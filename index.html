@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Report Card Generator · BC Primary</title>
+<title>Report Card Generator · Hans Helgeson Elementary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
@@ -136,7 +136,7 @@ textarea { resize: vertical; line-height: 1.6; }
   </div>
   <div>
     <div class="site-title">Report Card Generator</div>
-    <div class="site-sub">BC Primary · Grades 1 &amp; 2 · Metchosin</div>
+    <div class="site-sub">Hans Helgeson Elementary · Metchosin · Grades 1 &amp; 2</div>
   </div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
     <span id="header-class" style="font-size:13px;color:var(--ink-light)">No class loaded</span>
@@ -298,12 +298,31 @@ textarea { resize: vertical; line-height: 1.6; }
           <label>Additional notes <span class="label-opt">optional</span></label>
           <textarea id="s-notes" rows="2" placeholder="e.g. thrives during partner work, very engaged in outdoor learning, works best one-on-one"></textarea>
         </div>
+        <div class="field">
+          <label>Personal accomplishments <span class="label-opt">optional — specific to this student</span></label>
+          <textarea id="s-accomplishments" rows="2" placeholder="e.g. completed her first chapter book, performed a poem at the winter concert, earned the kindness award"></textarea>
+        </div>
         <div class="btn-row">
           <button class="btn btn-primary" onclick="addStudent()">
             <svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
             Add student
           </button>
           <button class="btn" onclick="clearForm()">Clear form</button>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:var(--sage-mid);background:var(--sage-light)">
+        <div class="card-title" style="border-color:var(--sage-mid)">
+          <svg viewBox="0 0 24 24" stroke-width="2" style="width:15px;height:15px;vertical-align:-2px;stroke:var(--sage);fill:none;margin-right:6px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Class events &amp; shared experiences <span class="label-opt" style="text-transform:none;font-size:12px;font-weight:400">— entered once, woven into every comment</span>
+        </div>
+        <div class="field" style="margin-bottom:8px">
+          <label>Class events &amp; field trips <span class="label-opt">optional</span></label>
+          <textarea id="class-events" rows="2" placeholder="e.g. visited Victoria Butterfly Gardens, attended a drumming workshop, went on a nature walk at Witty's Lagoon"></textarea>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Class projects &amp; accomplishments <span class="label-opt">optional</span></label>
+          <textarea id="class-projects" rows="2" placeholder="e.g. performed in the winter concert, completed a unit on local Indigenous culture, published a class poetry book"></textarea>
         </div>
       </div>
 
@@ -348,7 +367,7 @@ textarea { resize: vertical; line-height: 1.6; }
           </div>
           <p style="font-size:13px;color:var(--ink-light);margin-bottom:12px;line-height:1.6">
             This tool uses the Anthropic API to generate comments. You need a free API key — it only takes a minute to get one.
-            <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--sage);text-decoration:none;font-weight:500"> Get your API key here →</a>
+            <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--sage);text-decoration:none;font-weight:500"> Get your API key here →</a>
           </p>
           <div style="display:flex;gap:10px;align-items:flex-end">
             <div class="field" style="flex:1;margin-bottom:0">
@@ -361,7 +380,7 @@ textarea { resize: vertical; line-height: 1.6; }
           <details style="margin-top:14px">
             <summary style="font-size:12px;color:var(--ink-light);cursor:pointer;user-select:none">How to get an API key</summary>
             <ol style="font-size:13px;color:var(--ink-mid);line-height:1.9;padding-left:1.25rem;margin-top:8px">
-              <li>Go to <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--sage)">console.anthropic.com/keys</a></li>
+              <li>Go to <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--sage)">console.anthropic.com/settings/keys</a></li>
               <li>Sign up or log in (free account)</li>
               <li>Click <strong>Create Key</strong>, give it a name (e.g. "Report Cards")</li>
               <li>Copy the key (starts with <code style="font-size:12px;background:var(--paper);padding:1px 5px;border-radius:3px">sk-ant-</code>) and paste it above</li>
@@ -588,9 +607,9 @@ function copyQuality(q, el) {
 
 // Build CSV template dynamically
 function buildCSVTemplate() {
-  const header = 'First Name,Last Name,Pronouns,Grade,Term,Overall Progress,Strengths,Areas for Growth,Personality Qualities,Literacy Note,Numeracy Note,Additional Notes';
-  const ex1 = 'Emma,Thompson,she/her,Grade 1,Term 1 (Fall),progressing well,"loves reading, excellent listener","working on number formation","enthusiastic, kind & caring","reading at Level D, working on sight words","counting to 30, learning addition","thrives during partner work"';
-  const ex2 = 'Liam,Nakamura,he/him,Grade 2,Term 1 (Fall),meeting expectations,"strong with math, curious","building writing stamina","hardworking, playful","reading at Level F","skip counting to 100","very engaged during outdoor learning"';
+  const header = 'First Name,Last Name,Pronouns,Grade,Term,Overall Progress,Strengths,Areas for Growth,Personality Qualities,Literacy Note,Numeracy Note,Additional Notes,Personal Accomplishments';
+  const ex1 = 'Emma,Thompson,she/her,Grade 1,Term 1 (Fall),progressing well,"loves reading, excellent listener","working on number formation","enthusiastic, kind & caring","reading at Level D, working on sight words","counting to 30, learning addition","thrives during partner work","completed her first chapter book"';
+  const ex2 = 'Liam,Nakamura,he/him,Grade 2,Term 1 (Fall),meeting expectations,"strong with math, curious","building writing stamina","hardworking, playful","reading at Level F","skip counting to 100","very engaged during outdoor learning","earned the kindness award at the winter assembly"';
   document.getElementById('csv-template').value = [header, ex1, ex2].join('\n');
 }
 
@@ -659,13 +678,14 @@ function addStudent() {
     literacy: document.getElementById('s-literacy').value.trim(),
     numeracy: document.getElementById('s-numeracy').value.trim(),
     notes: document.getElementById('s-notes').value.trim(),
+    accomplishments: document.getElementById('s-accomplishments').value.trim(),
   });
   clearForm();
   renderRoster();
 }
 
 function clearForm() {
-  ['s-fname','s-lname','s-strengths','s-growth','s-literacy','s-numeracy','s-notes'].forEach(id => document.getElementById(id).value = '');
+  ['s-fname','s-lname','s-strengths','s-growth','s-literacy','s-numeracy','s-notes','s-accomplishments'].forEach(id => document.getElementById(id).value = '');
   document.querySelectorAll('#quality-chips .chip').forEach(c => {
     if (c.classList.contains('custom')) { c.remove(); } else { c.classList.remove('on'); }
   });
@@ -737,7 +757,7 @@ async function generateAll() {
     return;
   }
 
-  const systemPrompt = `You are an experienced, thoughtful BC primary school teacher writing individual student progress report comments. You have a gift for noticing what makes each child genuinely unique and expressing it in writing that parents will treasure.
+  const systemPrompt = `You are an experienced, thoughtful BC primary school teacher at Hans Helgeson Elementary School in Metchosin, British Columbia writing individual student progress report comments. You have a gift for noticing what makes each child genuinely unique and expressing it in writing that parents will treasure.
 
 Your comments follow these non-negotiable principles:
 
@@ -776,6 +796,9 @@ OUTPUT: Return only the comment text. No label, no preamble, no sign-off unless 
     const pronounObj  = s.pronouns === 'she/her' ? 'her' : s.pronouns === 'he/him' ? 'him' : 'them';
     const pronounPoss = s.pronouns === 'she/her' ? 'her' : s.pronouns === 'he/him' ? 'his' : 'their';
 
+    const classEvents = document.getElementById('class-events').value.trim();
+    const classProjects = document.getElementById('class-projects').value.trim();
+
     const userPrompt = `Write a progress report comment for ${s.fname} ${s.lname}, a ${s.grade} student. Length: ${length}. Tone: ${tone}.
 
 Student profile:
@@ -788,9 +811,14 @@ Student profile:
 - Personality & social qualities: ${s.qualities || 'not specified'}
 - Literacy note: ${s.literacy || 'not provided'}
 - Numeracy note: ${s.numeracy || 'not provided'}
+- Personal accomplishments this term: ${s.accomplishments || 'none noted'}
 - Additional context: ${s.notes || 'none'}
 
-Important: Do not open with "${s.fname}" as the very first word. Do not use hollow superlatives. Make this comment feel like it could only ever be about ${s.fname}.${teacher ? ` End with: — ${teacher}` : ''}`;
+Class context (shared by all students — reference naturally where relevant, not for every student):
+- Class events & field trips: ${classEvents || 'none noted'}
+- Class projects & accomplishments: ${classProjects || 'none noted'}
+
+Important: Do not open with "${s.fname}" as the very first word. Do not use hollow superlatives. Make this comment feel like it could only ever be about ${s.fname}. Weave in class events or projects only where they feel natural and specific to this student's experience — not as a checklist.${teacher ? ` End with: — ${teacher}` : ''}`;
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -904,7 +932,8 @@ function importCSV() {
   const idx = k => headers.findIndex(h => h.includes(k));
   const fni = idx('first'), lni = idx('last'), pi = idx('pronoun'), gi = idx('grade'),
     ti = idx('term'), oi = idx('progress'), si = idx('strength'), ai = idx('growth'),
-    qi = idx('quality'), li = idx('literacy'), mi = idx('numeracy'), xi = idx('additional');
+    qi = idx('quality'), li = idx('literacy'), mi = idx('numeracy'), xi = idx('additional'),
+    acci = idx('accomplish');
 
   let added = 0;
   for (let i = 1; i < lines.length; i++) {
@@ -926,6 +955,7 @@ function importCSV() {
       literacy: cols[li]?.trim() || '',
       numeracy: cols[mi]?.trim() || '',
       notes: cols[xi]?.trim() || '',
+      accomplishments: cols[acci]?.trim() || '',
     });
     added++;
   }
