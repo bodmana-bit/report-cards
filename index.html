@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Card Generator · BC Primary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sage: #5C7A5E;
+  --sage-light: #EEF3EE;
+  --sage-mid: #C4D4C5;
+  --cedar: #8B4A2B;
+  --cedar-light: #F7EDE7;
+  --sky: #4A7EA5;
+  --sky-light: #E8F2F9;
+  --ink: #1E2820;
+  --ink-mid: #4A5449;
+  --ink-light: #8A9489;
+  --paper: #F8FAF7;
+  --white: #FFFFFF;
+  --border: #D8E0D8;
+  --border-light: #ECF0EC;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; line-height: 1.6; }
+
+.site-header { background: var(--white); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 10; }
+.logo-mark { width: 38px; height: 38px; background: var(--sage); border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-mark svg { width: 20px; height: 20px; stroke: white; fill: none; }
+.site-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--ink); letter-spacing: -0.3px; }
+.site-sub { font-size: 12px; color: var(--ink-light); margin-top: 1px; }
+
+.app { display: flex; min-height: calc(100vh - 66px); }
+.sidebar { width: 220px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--border); padding: 1.25rem 0; position: sticky; top: 66px; height: calc(100vh - 66px); overflow-y: auto; }
+.main { flex: 1; padding: 2rem 2.5rem; max-width: 800px; }
+
+.nav-section { padding: 0 1rem; margin-bottom: 1.5rem; }
+.nav-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--ink-light); margin-bottom: 8px; font-weight: 500; }
+.nav-btn { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 12px; background: transparent; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink-mid); border-radius: var(--radius-sm); text-align: left; transition: background 0.13s, color 0.13s; }
+.nav-btn:hover { background: var(--paper); color: var(--ink); }
+.nav-btn.active { background: var(--sage-light); color: var(--sage); font-weight: 500; }
+.nav-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; flex-shrink: 0; }
+.nav-count { margin-left: auto; font-size: 11px; background: var(--sage); color: white; border-radius: 100px; padding: 1px 7px; font-weight: 500; }
+
+.section { display: none; }
+.section.active { display: block; }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--ink); margin-bottom: 4px; }
+.page-sub { font-size: 14px; color: var(--ink-light); margin-bottom: 1.75rem; line-height: 1.5; }
+
+.card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.25rem; }
+.card-title { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 1rem; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+label { font-size: 12px; font-weight: 500; color: var(--ink-mid); text-transform: uppercase; letter-spacing: 0.5px; }
+.label-opt { font-size: 11px; color: var(--ink-light); text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 4px; }
+input[type="text"], select, textarea { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; width: 100%; transition: border-color 0.13s, box-shadow 0.13s; -webkit-appearance: none; }
+input[type="text"]:focus, select:focus, textarea:focus { outline: none; border-color: var(--sage); box-shadow: 0 0 0 3px rgba(92,122,94,0.12); }
+select { cursor: pointer; }
+textarea { resize: vertical; line-height: 1.6; }
+
+/* Qualities picker */
+.qualities-panel { border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--paper); overflow: hidden; }
+.qualities-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; }
+.chip { font-size: 13px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 100px; cursor: pointer; background: var(--white); color: var(--ink-mid); transition: all 0.13s; user-select: none; display: inline-flex; align-items: center; gap: 5px; }
+.chip:hover { border-color: var(--sage-mid); color: var(--sage); }
+.chip.on { background: var(--sage-light); border-color: var(--sage-mid); color: var(--sage); font-weight: 500; }
+.chip.custom { border-style: dashed; }
+.chip.custom .chip-x { font-size: 15px; line-height: 1; opacity: 0.6; margin-left: 2px; }
+.chip.custom .chip-x:hover { opacity: 1; }
+.qualities-add { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border-light); background: var(--white); }
+.qualities-add input { flex: 1; font-size: 13px; padding: 6px 10px; }
+.qualities-add button { padding: 6px 14px; font-size: 13px; white-space: nowrap; font-family: 'DM Sans', sans-serif; border: 1px solid var(--sage-mid); border-radius: var(--radius-sm); background: var(--sage-light); color: var(--sage); cursor: pointer; font-weight: 500; }
+.qualities-add button:hover { background: var(--sage); color: white; }
+.qualities-count { font-size: 11px; color: var(--ink-light); padding: 4px 12px 8px; }
+
+.btn { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 9px 18px; border-radius: var(--radius-sm); cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--ink-mid); transition: all 0.13s; display: inline-flex; align-items: center; gap: 7px; }
+.btn:hover { background: var(--paper); border-color: var(--ink-light); color: var(--ink); }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--sage); border-color: var(--sage); color: white; }
+.btn-primary:hover { background: #4d6b4f; border-color: #4d6b4f; color: white; }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+.btn-danger { border-color: #F0DADA; color: var(--cedar); }
+.btn-danger:hover { background: var(--cedar-light); }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1.25rem; }
+.btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; flex-shrink: 0; }
+
+.student-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); background: var(--white); margin-bottom: 8px; transition: border-color 0.13s; }
+.student-item:hover { border-color: var(--sage-mid); }
+.s-name { font-size: 14px; font-weight: 500; }
+.s-meta { font-size: 12px; color: var(--ink-light); margin-top: 2px; }
+.s-badges { display: flex; align-items: center; gap: 8px; }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 100px; font-weight: 500; border: 1px solid; }
+.badge-done { background: #EEF7EE; color: #3A6B3C; border-color: #C0D9C0; }
+.badge-pending { background: var(--paper); color: var(--ink-light); border-color: var(--border); }
+.empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--ink-light); font-size: 14px; }
+.empty-state svg { width: 36px; height: 36px; stroke: var(--border); fill: none; margin-bottom: 10px; }
+
+.prog-wrap { background: var(--border-light); border-radius: 3px; height: 5px; margin-bottom: 1.5rem; overflow: hidden; display: none; }
+.prog-fill { height: 100%; background: var(--sage); border-radius: 3px; transition: width 0.3s; }
+
+.result-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+.result-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.result-name { font-weight: 500; font-size: 15px; }
+.result-meta { font-size: 12px; color: var(--ink-light); margin-top: 2px; }
+.result-text { font-size: 14px; line-height: 1.85; color: var(--ink); white-space: pre-wrap; background: var(--paper); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
+
+.callout { border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 1.25rem; display: flex; gap: 10px; align-items: flex-start; border: 1px solid; }
+.callout svg { width: 16px; height: 16px; stroke: currentColor; fill: none; flex-shrink: 0; margin-top: 2px; }
+.callout-info { background: var(--sky-light); color: #2E5F82; border-color: #B8D4E9; }
+.callout-success { background: var(--sage-light); color: var(--sage); border-color: var(--sage-mid); }
+
+.csv-area { font-family: 'Courier New', monospace; font-size: 12px; height: 150px; background: #F5F7F5; }
+.gen-opts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 1rem; }
+
+@media (max-width: 700px) {
+  .sidebar { display: none; }
+  .main { padding: 1.25rem; }
+  .form-row, .form-row-3, .gen-opts { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-mark">
+    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2L3 7v10l9 5 9-5V7z"/><path d="M12 12L3 7"/><path d="M12 12v10"/><path d="M12 12l9-5"/></svg>
+  </div>
+  <div>
+    <div class="site-title">Report Card Generator</div>
+    <div class="site-sub">BC Primary · Grades 1 &amp; 2 · Metchosin</div>
+  </div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <span id="header-class" style="font-size:13px;color:var(--ink-light)">No class loaded</span>
+    <button class="btn btn-sm" onclick="showTab('classes')" style="font-size:12px">
+      <svg viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Manage classes
+    </button>
+  </div>
+</header>
+
+<div class="app">
+  <nav class="sidebar" aria-label="App navigation">
+    <div class="nav-section">
+      <div class="nav-label">Workflow</div>
+      <button class="nav-btn active" onclick="showTab('students')" id="nav-students">
+        <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+        Students
+        <span class="nav-count" id="nav-count">0</span>
+      </button>
+      <button class="nav-btn" onclick="showTab('generate')" id="nav-generate">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m13 6-2 1"/><path d="m13 12-2-1"/><path d="M3 14l4 1 1 4 3-5 4 2 2-9-12 2z"/></svg>
+        Generate
+      </button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Setup</div>
+      <button class="nav-btn" onclick="showTab('template')" id="nav-template">
+        <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        Spreadsheet
+      </button>
+      <button class="nav-btn" onclick="showTab('classes')" id="nav-classes">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Class years
+      </button>
+      <button class="nav-btn" onclick="showTab('help')" id="nav-help">
+        <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        How to use
+      </button>
+    </div>
+  </nav>
+
+  <main class="main" id="main-content">
+
+    <!-- STUDENTS TAB -->
+    <div class="section active" id="sec-students">
+      <h1 class="page-title">Your students</h1>
+      <p class="page-sub">Add each student's details here. The more specific you are, the better the generated comments will be.</p>
+
+      <div class="card">
+        <div class="card-title">Add a student</div>
+
+        <!-- Name row -->
+        <div class="form-row">
+          <div class="field">
+            <label>First name *</label>
+            <input type="text" id="s-fname" placeholder="e.g. Emma">
+          </div>
+          <div class="field">
+            <label>Last name *</label>
+            <input type="text" id="s-lname" placeholder="e.g. Thompson">
+          </div>
+        </div>
+
+        <!-- Pronouns + grade + term + progress -->
+        <div class="form-row">
+          <div class="field">
+            <label>Pronouns</label>
+            <select id="s-pronouns">
+              <option value="she/her">she / her</option>
+              <option value="he/him">he / him</option>
+              <option value="they/them">they / them</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Grade</label>
+            <select id="s-grade">
+              <option>Grade 1</option>
+              <option>Grade 2</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Term</label>
+            <select id="s-term">
+              <option>Term 1 (Fall)</option>
+              <option>Term 2 (Winter)</option>
+              <option>Term 3 (Spring)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Overall progress</label>
+            <select id="s-progress">
+              <option value="progressing well">Progressing well</option>
+              <option value="meeting expectations">Meeting expectations</option>
+              <option value="approaching expectations">Approaching expectations</option>
+              <option value="excelling">Excelling</option>
+              <option value="needing additional support">Needing support</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Strengths <span class="label-opt">— what this student does well</span></label>
+          <textarea id="s-strengths" rows="2" placeholder="e.g. strong reader, loves math games, excellent at drawing, kind to classmates"></textarea>
+        </div>
+        <div class="field">
+          <label>Areas for growth <span class="label-opt">— what to work on next</span></label>
+          <textarea id="s-growth" rows="2" placeholder="e.g. needs support with printing, working on listening skills, building number sense"></textarea>
+        </div>
+
+        <!-- Qualities picker -->
+        <div class="field">
+          <label>Personality &amp; social qualities <span class="label-opt">— click to select, or add your own</span></label>
+          <div class="qualities-panel">
+            <div class="qualities-chips" id="quality-chips">
+              <span class="chip" onclick="toggleChip(this)">enthusiastic</span>
+              <span class="chip" onclick="toggleChip(this)">kind &amp; caring</span>
+              <span class="chip" onclick="toggleChip(this)">creative</span>
+              <span class="chip" onclick="toggleChip(this)">curious</span>
+              <span class="chip" onclick="toggleChip(this)">hardworking</span>
+              <span class="chip" onclick="toggleChip(this)">independent</span>
+              <span class="chip" onclick="toggleChip(this)">collaborative</span>
+              <span class="chip" onclick="toggleChip(this)">thoughtful</span>
+              <span class="chip" onclick="toggleChip(this)">persevering</span>
+              <span class="chip" onclick="toggleChip(this)">playful</span>
+              <span class="chip" onclick="toggleChip(this)">quiet &amp; focused</span>
+              <span class="chip" onclick="toggleChip(this)">social &amp; talkative</span>
+              <span class="chip" onclick="toggleChip(this)">empathetic</span>
+              <span class="chip" onclick="toggleChip(this)">imaginative</span>
+              <span class="chip" onclick="toggleChip(this)">resilient</span>
+              <span class="chip" onclick="toggleChip(this)">detail-oriented</span>
+              <span class="chip" onclick="toggleChip(this)">gentle</span>
+              <span class="chip" onclick="toggleChip(this)">confident</span>
+              <span class="chip" onclick="toggleChip(this)">inquisitive</span>
+              <span class="chip" onclick="toggleChip(this)">caring leader</span>
+              <span class="chip" onclick="toggleChip(this)">loves to help others</span>
+              <span class="chip" onclick="toggleChip(this)">loves outdoor learning</span>
+            </div>
+            <div class="qualities-count" id="q-count">0 selected</div>
+            <div class="qualities-add">
+              <input type="text" id="q-custom" placeholder="Type a custom quality and press Add…" onkeydown="if(event.key==='Enter'){addCustomQuality()}">
+              <button onclick="addCustomQuality()">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Literacy note <span class="label-opt">optional</span></label>
+            <input type="text" id="s-literacy" placeholder="e.g. reading at Level E, working on blends">
+          </div>
+          <div class="field">
+            <label>Numeracy note <span class="label-opt">optional</span></label>
+            <input type="text" id="s-numeracy" placeholder="e.g. skip counting to 100, learning addition">
+          </div>
+        </div>
+        <div class="field">
+          <label>Additional notes <span class="label-opt">optional</span></label>
+          <textarea id="s-notes" rows="2" placeholder="e.g. thrives during partner work, very engaged in outdoor learning, works best one-on-one"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="addStudent()">
+            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Add student
+          </button>
+          <button class="btn" onclick="clearForm()">Clear form</button>
+        </div>
+      </div>
+
+      <h2 style="font-size:15px;font-weight:500;margin-bottom:12px;color:var(--ink)">Student roster <span id="roster-count" style="color:var(--ink-light);font-weight:400;font-size:14px">(0 students)</span></h2>
+      <div id="student-list">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+          <div>No students added yet.</div>
+          <div style="font-size:12px;margin-top:4px">Fill in the form above, or import from the Spreadsheet tab.</div>
+        </div>
+      </div>
+      <div id="roster-actions" style="display:none;margin-top:1rem">
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="showTab('generate')">
+            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 14l4 1 1 4 3-5 4 2 2-9-12 2z"/></svg>
+            Generate report cards →
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="clearAll()">Remove all students</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GENERATE TAB -->
+    <div class="section" id="sec-generate">
+      <h1 class="page-title">Generate comments</h1>
+      <p class="page-sub">Choose your options below, then generate. Each comment is written individually — no two will be the same.</p>
+
+      <div id="gen-empty-msg" style="display:none">
+        <div class="callout callout-info">
+          <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <div>No students added yet. Go to the <strong>Students</strong> tab to add your class first.</div>
+        </div>
+      </div>
+
+      <div id="gen-main">
+
+        <!-- API key setup -->
+        <div class="card" id="apikey-card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" stroke-width="2" style="width:15px;height:15px;vertical-align:-2px;stroke:currentColor;fill:none;margin-right:6px"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            Anthropic API key
+          </div>
+          <p style="font-size:13px;color:var(--ink-light);margin-bottom:12px;line-height:1.6">
+            This tool uses the Anthropic API to generate comments. You need a free API key — it only takes a minute to get one.
+            <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--sage);text-decoration:none;font-weight:500"> Get your API key here →</a>
+          </p>
+          <div style="display:flex;gap:10px;align-items:flex-end">
+            <div class="field" style="flex:1;margin-bottom:0">
+              <label>API key</label>
+              <input type="password" id="api-key-input" placeholder="sk-ant-…" oninput="checkApiKey()">
+            </div>
+            <button class="btn btn-primary" onclick="saveApiKey()" id="save-key-btn" disabled>Save key</button>
+          </div>
+          <div id="apikey-msg" style="font-size:13px;margin-top:10px"></div>
+          <details style="margin-top:14px">
+            <summary style="font-size:12px;color:var(--ink-light);cursor:pointer;user-select:none">How to get an API key</summary>
+            <ol style="font-size:13px;color:var(--ink-mid);line-height:1.9;padding-left:1.25rem;margin-top:8px">
+              <li>Go to <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--sage)">console.anthropic.com/keys</a></li>
+              <li>Sign up or log in (free account)</li>
+              <li>Click <strong>Create Key</strong>, give it a name (e.g. "Report Cards")</li>
+              <li>Copy the key (starts with <code style="font-size:12px;background:var(--paper);padding:1px 5px;border-radius:3px">sk-ant-</code>) and paste it above</li>
+              <li>Add a small amount of credit ($5 covers hundreds of report cards)</li>
+            </ol>
+          </details>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Generation options</div>
+          <div class="gen-opts">
+            <div class="field" style="margin-bottom:0">
+              <label>Tone</label>
+              <select id="opt-tone">
+                <option value="warm and encouraging">Warm &amp; encouraging</option>
+                <option value="professional and formal">Professional &amp; formal</option>
+                <option value="warm, detailed and descriptive">Warm &amp; detailed</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Comment length</label>
+              <select id="opt-length">
+                <option value="3–4 sentences">Short (3–4 sentences)</option>
+                <option value="5–6 sentences" selected>Medium (5–6 sentences)</option>
+                <option value="a short paragraph of 7–8 sentences">Longer (7–8 sentences)</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Teacher name <span class="label-opt">optional</span></label>
+              <input type="text" id="opt-teacher" placeholder="e.g. Ms. Reyes">
+            </div>
+          </div>
+          <div class="btn-row" style="margin-top:0.75rem">
+            <button class="btn btn-primary" id="gen-btn" onclick="generateAll()">
+              <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 14l4 1 1 4 3-5 4 2 2-9-12 2z"/></svg>
+              Generate all report cards
+            </button>
+            <button class="btn btn-sm" onclick="copyAllResults()" id="copy-all-btn" style="display:none">
+              <svg viewBox="0 0 24 24" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy all
+            </button>
+          </div>
+        </div>
+
+        <div class="prog-wrap" id="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+        <div id="gen-status" style="font-size:13px;color:var(--ink-light);margin-bottom:1rem;display:none"></div>
+        <div id="results-wrap"></div>
+      </div>
+    </div>
+
+    <!-- TEMPLATE TAB -->
+    <div class="section" id="sec-template">
+      <h1 class="page-title">Spreadsheet template</h1>
+      <p class="page-sub">Fill in this CSV template in Excel or Google Sheets, then paste and import to load all your students at once.</p>
+
+      <div class="card">
+        <div class="card-title">Qualities reference — copy these into your spreadsheet</div>
+        <p style="font-size:13px;color:var(--ink-light);margin-bottom:12px;line-height:1.6">In the <strong>Personality Qualities</strong> column, copy and paste from this list — separate multiple qualities with a comma. You can also write your own.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px" id="ref-chips"></div>
+        <p style="font-size:12px;color:var(--ink-light);margin-top:8px">Example cell value: <code style="background:var(--paper);padding:2px 6px;border-radius:4px;font-size:12px">enthusiastic, curious, kind &amp; caring</code></p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Download template</div>
+        <p style="font-size:13px;color:var(--ink-light);margin-bottom:1rem;line-height:1.6">The template includes all columns. Fill one row per student. Commas inside a cell should be wrapped in quotes — Excel and Google Sheets handle this automatically when you save as CSV.</p>
+        <textarea class="csv-area" id="csv-template" readonly></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="downloadCSV()">
+            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download .csv template
+          </button>
+          <button class="btn" onclick="copyCSV()">
+            <svg viewBox="0 0 24 24" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy template
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Import from spreadsheet</div>
+        <div class="callout callout-info" style="margin-bottom:1rem">
+          <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <div>In Google Sheets: <strong>File → Download → Comma Separated Values (.csv)</strong>, then open the file in a text editor and paste contents below. In Excel: save as CSV, open in Notepad and paste here.</div>
+        </div>
+        <div class="field">
+          <label>Paste CSV data here</label>
+          <textarea id="csv-import" rows="7" placeholder="Paste your completed CSV content here (include the header row)..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="importCSV()">
+            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Import students
+          </button>
+        </div>
+        <div id="import-msg" style="margin-top:10px;font-size:13px"></div>
+      </div>
+    </div>
+
+    <!-- CLASSES TAB -->
+    <div class="section" id="sec-classes">
+      <h1 class="page-title">Class years</h1>
+      <p class="page-sub">Save your current class, start fresh for a new school year, and reload any previous year at any time.</p>
+
+      <!-- Save current class -->
+      <div class="card">
+        <div class="card-title">Save current class</div>
+        <p style="font-size:13px;color:var(--ink-light);margin-bottom:12px;line-height:1.6">Give this class a name so you can find it later. A good name includes the school year and grade, e.g. <em>2025–26 Gr 1/2</em>.</p>
+        <div style="display:flex;gap:10px;align-items:flex-end">
+          <div class="field" style="flex:1;margin-bottom:0">
+            <label>Class name</label>
+            <input type="text" id="class-name-input" placeholder="e.g. 2025–26 Grade 1/2" oninput="document.getElementById('save-class-btn').disabled=!this.value.trim()">
+          </div>
+          <button class="btn btn-primary" id="save-class-btn" onclick="saveCurrentClass()" disabled>
+            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save class
+          </button>
+        </div>
+        <div id="save-class-msg" style="font-size:13px;margin-top:10px"></div>
+      </div>
+
+      <!-- Start new year -->
+      <div class="card">
+        <div class="card-title">Start a new school year</div>
+        <p style="font-size:13px;color:var(--ink-light);margin-bottom:12px;line-height:1.6">
+          This clears the current student roster so you can start fresh. <strong>Make sure you've saved the current class above first</strong> — this cannot be undone.
+        </p>
+        <button class="btn btn-danger" onclick="startNewYear()">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+          Clear roster &amp; start new year
+        </button>
+      </div>
+
+      <!-- Saved classes -->
+      <h2 style="font-size:15px;font-weight:500;margin-bottom:12px;color:var(--ink)">Saved classes</h2>
+      <div id="saved-classes-list">
+        <div class="empty-state" style="padding:1.5rem 0">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <div>No classes saved yet.</div>
+          <div style="font-size:12px;margin-top:4px">Save your current class above to create your first archive.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HELP TAB -->
+    <div class="section" id="sec-help">
+      <h1 class="page-title">How to use this tool</h1>
+      <p class="page-sub">A quick guide to getting the best report card comments for your class.</p>
+
+      <div class="card">
+        <div class="card-title">Recommended workflow for 40 students</div>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;font-size:14px;line-height:1.7">
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">1</div>
+            <div>Go to the <strong>Spreadsheet tab</strong> and download the CSV template. The Qualities reference list on that page shows exactly what to type in the Personality Qualities column.</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">2</div>
+            <div>Fill in the spreadsheet in Excel or Google Sheets — one row per student. Save as CSV, open in a text editor, and paste into the Import section.</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">3</div>
+            <div>Go to <strong>Generate</strong>, choose tone and length, and click "Generate all report cards." The AI writes each comment individually.</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">4</div>
+            <div>Use the <strong>Copy</strong> button per student, or <strong>Copy all</strong> to grab every comment at once. Paste directly into your report card system.</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">5</div>
+            <div>Review and personalise — the comments are a strong starting point, but a few of your own touches will make them shine.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Tips for better comments</div>
+        <ul style="font-size:14px;line-height:1.9;color:var(--ink-mid);padding-left:1.25rem">
+          <li>The more specific your strengths and growth notes, the more tailored the comment.</li>
+          <li>Literacy and numeracy notes are woven in naturally — include specific reading levels or strategies if you have them.</li>
+          <li>Select 2–4 personality qualities per student for the best balance.</li>
+          <li>You can add your own custom qualities using the "Add" input — they'll be remembered for that student.</li>
+          <li>If a comment doesn't feel right, click "Regenerate all" to rewrite the full set.</li>
+          <li>BC primary reports focus on the learning journey, not grades. All generated comments are written with this in mind.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Privacy note</div>
+        <p style="font-size:14px;color:var(--ink-mid);line-height:1.7">Student data is used only to generate comments and is sent to the Anthropic API for processing. It is not stored or used for training. All data lives in your browser tab and is cleared when you close the page. Avoid entering sensitive identifying information beyond what is needed for the comment.</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let students = [];
+let genResults = {};
+
+// ── Default qualities list ──
+const DEFAULT_QUALITIES = [
+  'enthusiastic','kind & caring','creative','curious','hardworking',
+  'independent','collaborative','thoughtful','persevering','playful',
+  'quiet & focused','social & talkative','empathetic','imaginative',
+  'resilient','detail-oriented','gentle','confident','inquisitive',
+  'caring leader','loves to help others','loves outdoor learning'
+];
+
+// Build reference chips on spreadsheet tab
+function buildRefChips() {
+  const el = document.getElementById('ref-chips');
+  el.innerHTML = DEFAULT_QUALITIES.map(q =>
+    `<span style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:100px;background:var(--white);color:var(--ink-mid);cursor:pointer" onclick="copyQuality('${q}',this)" title="Click to copy">${q}</span>`
+  ).join('');
+}
+
+function copyQuality(q, el) {
+  navigator.clipboard.writeText(q).then(() => {
+    const orig = el.textContent;
+    el.textContent = '✓ copied';
+    setTimeout(() => el.textContent = orig, 1200);
+  });
+}
+
+// Build CSV template dynamically
+function buildCSVTemplate() {
+  const header = 'First Name,Last Name,Pronouns,Grade,Term,Overall Progress,Strengths,Areas for Growth,Personality Qualities,Literacy Note,Numeracy Note,Additional Notes';
+  const ex1 = 'Emma,Thompson,she/her,Grade 1,Term 1 (Fall),progressing well,"loves reading, excellent listener","working on number formation","enthusiastic, kind & caring","reading at Level D, working on sight words","counting to 30, learning addition","thrives during partner work"';
+  const ex2 = 'Liam,Nakamura,he/him,Grade 2,Term 1 (Fall),meeting expectations,"strong with math, curious","building writing stamina","hardworking, playful","reading at Level F","skip counting to 100","very engaged during outdoor learning"';
+  document.getElementById('csv-template').value = [header, ex1, ex2].join('\n');
+}
+
+// ── Tab navigation ──
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.getElementById('nav-' + id)?.classList.add('active');
+  if (id === 'generate') { refreshGenView(); loadSavedKey(); }
+  if (id === 'classes') renderSavedClasses();
+}
+
+// ── Qualities chip logic ──
+function toggleChip(el) {
+  el.classList.toggle('on');
+  updateQCount();
+}
+
+function updateQCount() {
+  const n = document.querySelectorAll('#quality-chips .chip.on').length;
+  document.getElementById('q-count').textContent = n === 0 ? '0 selected' : `${n} selected`;
+}
+
+function addCustomQuality() {
+  const input = document.getElementById('q-custom');
+  const val = input.value.trim();
+  if (!val) return;
+  const chips = document.getElementById('quality-chips');
+  // Check not already present
+  const existing = [...chips.querySelectorAll('.chip')].find(c => c.dataset.label === val);
+  if (existing) { existing.classList.add('on'); updateQCount(); input.value = ''; return; }
+  const chip = document.createElement('span');
+  chip.className = 'chip custom on';
+  chip.dataset.label = val;
+  chip.innerHTML = `${esc(val)} <span class="chip-x" onclick="event.stopPropagation();this.parentElement.remove();updateQCount()" title="Remove">×</span>`;
+  chip.onclick = function() { this.classList.toggle('on'); updateQCount(); };
+  chips.appendChild(chip);
+  updateQCount();
+  input.value = '';
+}
+
+function getSelectedQualities() {
+  return [...document.querySelectorAll('#quality-chips .chip.on')]
+    .map(c => c.dataset.label || c.textContent.replace('×','').trim())
+    .join(', ');
+}
+
+// ── Form ──
+function addStudent() {
+  const fname = document.getElementById('s-fname').value.trim();
+  const lname = document.getElementById('s-lname').value.trim();
+  if (!fname) { alert('Please enter a first name.'); return; }
+  if (!lname) { alert('Please enter a last name.'); return; }
+  students.push({
+    id: Date.now() + Math.random(),
+    fname, lname,
+    fullName: fname + ' ' + lname,
+    pronouns: document.getElementById('s-pronouns').value,
+    grade: document.getElementById('s-grade').value,
+    term: document.getElementById('s-term').value,
+    progress: document.getElementById('s-progress').value,
+    strengths: document.getElementById('s-strengths').value.trim(),
+    growth: document.getElementById('s-growth').value.trim(),
+    qualities: getSelectedQualities(),
+    literacy: document.getElementById('s-literacy').value.trim(),
+    numeracy: document.getElementById('s-numeracy').value.trim(),
+    notes: document.getElementById('s-notes').value.trim(),
+  });
+  clearForm();
+  renderRoster();
+}
+
+function clearForm() {
+  ['s-fname','s-lname','s-strengths','s-growth','s-literacy','s-numeracy','s-notes'].forEach(id => document.getElementById(id).value = '');
+  document.querySelectorAll('#quality-chips .chip').forEach(c => {
+    if (c.classList.contains('custom')) { c.remove(); } else { c.classList.remove('on'); }
+  });
+  updateQCount();
+}
+
+function removeStudent(id) {
+  students = students.filter(s => s.id !== id);
+  delete genResults[id];
+  renderRoster();
+}
+
+function renderRoster() {
+  const el = document.getElementById('student-list');
+  const count = students.length;
+  document.getElementById('roster-count').textContent = `(${count} student${count !== 1 ? 's' : ''})`;
+  document.getElementById('nav-count').textContent = count;
+  document.getElementById('roster-actions').style.display = count ? 'block' : 'none';
+  if (!count) {
+    el.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg><div>No students added yet.</div><div style="font-size:12px;margin-top:4px">Fill in the form above, or import from the Spreadsheet tab.</div></div>`;
+    return;
+  }
+  el.innerHTML = students.map(s => `
+    <div class="student-item">
+      <div>
+        <div class="s-name">${esc(s.fullName)}</div>
+        <div class="s-meta">${esc(s.grade)} · ${esc(s.term)} · ${esc(s.pronouns)}</div>
+      </div>
+      <div class="s-badges">
+        <span class="badge ${genResults[s.id] ? 'badge-done' : 'badge-pending'}">${genResults[s.id] ? '✓ done' : 'pending'}</span>
+        <button class="btn btn-sm btn-danger" onclick="removeStudent(${JSON.stringify(s.id)})" title="Remove ${esc(s.fullName)}">
+          <svg viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;stroke:currentColor;fill:none"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+function refreshGenView() {
+  const empty = document.getElementById('gen-empty-msg');
+  const main = document.getElementById('gen-main');
+  if (!students.length) { empty.style.display = 'block'; main.style.display = 'none'; }
+  else { empty.style.display = 'none'; main.style.display = 'block'; }
+}
+
+// ── Generate ──
+async function generateAll() {
+  if (!students.length) return;
+  const tone = document.getElementById('opt-tone').value;
+  const length = document.getElementById('opt-length').value;
+  const teacher = document.getElementById('opt-teacher').value.trim();
+  const btn = document.getElementById('gen-btn');
+  const progWrap = document.getElementById('prog-wrap');
+  const progFill = document.getElementById('prog-fill');
+  const status = document.getElementById('gen-status');
+  const resultsWrap = document.getElementById('results-wrap');
+
+  btn.disabled = true;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:currentColor;fill:none;animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Generating…';
+  progWrap.style.display = 'block';
+  status.style.display = 'block';
+  resultsWrap.innerHTML = '';
+  genResults = {};
+
+  const apiKey = localStorage.getItem('rcg_api_key') || '';
+  if (!apiKey) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:currentColor;fill:none"><path d="M3 14l4 1 1 4 3-5 4 2 2-9-12 2z"/></svg> Generate all report cards';
+    showError('Please enter and save your Anthropic API key above before generating.');
+    return;
+  }
+
+  const systemPrompt = `You are an experienced, thoughtful BC primary school teacher writing individual student progress report comments. You have a gift for noticing what makes each child genuinely unique and expressing it in writing that parents will treasure.
+
+Your comments follow these non-negotiable principles:
+
+VOICE & TONE
+- Warm, professional, and sincere — the kind of writing a parent reads and thinks "she really knows my child"
+- Conversational but polished. Readable aloud. Never stiff or bureaucratic.
+- Avoid hollow praise words like "wonderful", "amazing", "fantastic", "superb" — show the quality through specific detail instead
+- Never use the same opening word or phrase twice across a set of reports. Vary sentence structure throughout.
+
+UNIQUENESS
+- Every comment must feel written specifically for this one child — not a template with a name swapped in
+- Draw directly from the specific details provided. Anchor every claim in something concrete.
+- If two students share a strength (e.g. "loves reading"), the comments must still sound completely different in how that strength is described and contextualised
+- Vary your sentence openings, rhythm, and structure so no two comments read alike
+
+BC PRIMARY CURRICULUM ALIGNMENT
+- Progress reports describe the learning journey — never use letter grades, percentages, or ranking language
+- Use BC curriculum language naturally: "developing", "demonstrating", "applying", "exploring", "building on"
+- Frame growth areas with a constructive, forward-looking lens — never deficit language
+- Acknowledge the whole child: academic skills, social-emotional development, curiosity, and character
+
+STRUCTURE (for the length requested)
+- Open with something specific and vivid about this student — not a generic opener
+- Weave literacy and/or numeracy details in naturally if provided — don't list them separately
+- Acknowledge at least one growth area with sensitivity and optimism
+- Close with a genuine, personalised forward-looking statement — not a generic "keep up the great work"
+
+OUTPUT: Return only the comment text. No label, no preamble, no sign-off unless instructed.`;
+
+  for (let i = 0; i < students.length; i++) {
+    const s = students[i];
+    progFill.style.width = Math.round((i / students.length) * 100) + '%';
+    status.textContent = `Generating ${i + 1} of ${students.length}: ${s.fullName}…`;
+
+    const pronounSubj = s.pronouns === 'she/her' ? 'She' : s.pronouns === 'he/him' ? 'He' : 'They';
+    const pronounObj  = s.pronouns === 'she/her' ? 'her' : s.pronouns === 'he/him' ? 'him' : 'them';
+    const pronounPoss = s.pronouns === 'she/her' ? 'her' : s.pronouns === 'he/him' ? 'his' : 'their';
+
+    const userPrompt = `Write a progress report comment for ${s.fname} ${s.lname}, a ${s.grade} student. Length: ${length}. Tone: ${tone}.
+
+Student profile:
+- Full name: ${s.fname} ${s.lname} (use first name only in the comment)
+- Pronouns: ${s.pronouns} (use ${pronounSubj}/${pronounObj}/${pronounPoss} throughout)
+- Term: ${s.term}
+- Overall progress: ${s.progress}
+- Strengths: ${s.strengths || 'not specified'}
+- Areas for growth: ${s.growth || 'not specified'}
+- Personality & social qualities: ${s.qualities || 'not specified'}
+- Literacy note: ${s.literacy || 'not provided'}
+- Numeracy note: ${s.numeracy || 'not provided'}
+- Additional context: ${s.notes || 'none'}
+
+Important: Do not open with "${s.fname}" as the very first word. Do not use hollow superlatives. Make this comment feel like it could only ever be about ${s.fname}.${teacher ? ` End with: — ${teacher}` : ''}`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userPrompt }]
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const errMsg = data?.error?.message || `API error ${res.status}`;
+        if (res.status === 401) throw new Error('Invalid API key — please check and re-save your key above.');
+        if (res.status === 429) throw new Error('Rate limit reached — please wait a moment and try again.');
+        if (res.status === 402) throw new Error('Insufficient API credits — please add credit at console.anthropic.com.');
+        throw new Error(errMsg);
+      }
+      const text = data.content?.find(b => b.type === 'text')?.text || 'Error generating comment — please try again.';
+      genResults[s.id] = text;
+
+      resultsWrap.innerHTML += `
+        <div class="result-card" id="rc-${i}">
+          <div class="result-header">
+            <div>
+              <div class="result-name">${esc(s.fullName)}</div>
+              <div class="result-meta">${esc(s.grade)} · ${esc(s.term)} · ${esc(s.pronouns)}</div>
+            </div>
+            <button class="btn btn-sm" onclick="copySingle(${JSON.stringify(s.id)}, this)">
+              <svg viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;stroke:currentColor;fill:none"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <div class="result-text" id="rt-${s.id}">${esc(text)}</div>
+        </div>`;
+    } catch (e) {
+      const errText = e.message || 'Unknown error';
+      // If it's an auth/credit error, stop the whole run
+      if (errText.includes('API key') || errText.includes('credits') || errText.includes('Rate limit')) {
+        progWrap.style.display = 'none';
+        status.style.display = 'none';
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:currentColor;fill:none"><path d="M3 14l4 1 1 4 3-5 4 2 2-9-12 2z"/></svg> Generate all report cards';
+        showError(errText);
+        return;
+      }
+      resultsWrap.innerHTML += `<div class="result-card"><div class="result-name">${esc(s.fullName)}</div><div style="color:var(--cedar);font-size:13px;margin-top:6px;background:var(--cedar-light);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid #F0DADA"><strong>Could not generate:</strong> ${esc(errText)}</div></div>`;
+    }
+    await sleep(250);
+  }
+
+  progFill.style.width = '100%';
+  status.textContent = `Done! ${students.length} comment${students.length !== 1 ? 's' : ''} generated.`;
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:currentColor;fill:none"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg> Regenerate all';
+  document.getElementById('copy-all-btn').style.display = 'inline-flex';
+  renderRoster();
+}
+
+function copySingle(id, btn) {
+  const text = genResults[id];
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.innerHTML = orig, 2000);
+  });
+}
+
+function copyAllResults() {
+  const all = students.map(s => {
+    const t = genResults[s.id];
+    return t ? `${s.fullName} (${s.grade} · ${s.term})\n${t}` : null;
+  }).filter(Boolean).join('\n\n---\n\n');
+  navigator.clipboard.writeText(all).then(() => {
+    const btn = document.getElementById('copy-all-btn');
+    btn.textContent = '✓ All copied!';
+    setTimeout(() => btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:currentColor;fill:none"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy all', 2000);
+  });
+}
+
+// ── Spreadsheet ──
+function downloadCSV() {
+  const csv = document.getElementById('csv-template').value;
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'student_report_template.csv';
+  a.click();
+}
+
+function copyCSV() {
+  navigator.clipboard.writeText(document.getElementById('csv-template').value);
+}
+
+function importCSV() {
+  const raw = document.getElementById('csv-import').value.trim();
+  const msg = document.getElementById('import-msg');
+  if (!raw) { msg.innerHTML = '<span style="color:var(--cedar)">Please paste your CSV data first.</span>'; return; }
+  const lines = raw.split('\n').filter(l => l.trim());
+  if (lines.length < 2) { msg.innerHTML = '<span style="color:var(--cedar)">Need at least a header row and one student row.</span>'; return; }
+
+  const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+  const idx = k => headers.findIndex(h => h.includes(k));
+  const fni = idx('first'), lni = idx('last'), pi = idx('pronoun'), gi = idx('grade'),
+    ti = idx('term'), oi = idx('progress'), si = idx('strength'), ai = idx('growth'),
+    qi = idx('quality'), li = idx('literacy'), mi = idx('numeracy'), xi = idx('additional');
+
+  let added = 0;
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    const fname = cols[fni]?.trim();
+    const lname = cols[lni]?.trim() || '';
+    if (!fname) continue;
+    students.push({
+      id: Date.now() + i + Math.random(),
+      fname, lname,
+      fullName: lname ? fname + ' ' + lname : fname,
+      pronouns: cols[pi]?.trim() || 'she/her',
+      grade: cols[gi]?.trim() || 'Grade 1',
+      term: cols[ti]?.trim() || 'Term 1 (Fall)',
+      progress: cols[oi]?.trim() || 'progressing well',
+      strengths: cols[si]?.trim() || '',
+      growth: cols[ai]?.trim() || '',
+      qualities: cols[qi]?.trim() || '',
+      literacy: cols[li]?.trim() || '',
+      numeracy: cols[mi]?.trim() || '',
+      notes: cols[xi]?.trim() || '',
+    });
+    added++;
+  }
+  msg.innerHTML = `<span style="color:var(--sage)">✓ Imported ${added} student${added !== 1 ? 's' : ''} successfully.</span>`;
+  renderRoster();
+  setTimeout(() => showTab('students'), 1200);
+}
+
+function parseCSVLine(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur);
+  return result.map(v => v.replace(/^"|"$/g, ''));
+}
+
+function clearAll() {
+  if (!confirm('Remove all students from the roster?')) return;
+  students = []; genResults = {};
+  renderRoster(); refreshGenView();
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+
+// ── API key ──
+function checkApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  document.getElementById('save-key-btn').disabled = !val.startsWith('sk-ant-');
+}
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant-')) {
+    document.getElementById('apikey-msg').innerHTML = '<span style="color:var(--cedar)">Key should start with sk-ant- — please check and try again.</span>';
+    return;
+  }
+  localStorage.setItem('rcg_api_key', val);
+  document.getElementById('apikey-msg').innerHTML = '<span style="color:var(--sage)">✓ Key saved. You\'re ready to generate!</span>';
+  document.getElementById('api-key-input').value = '••••••••••••••••••••••••' + val.slice(-4);
+  document.getElementById('save-key-btn').disabled = true;
+  // Collapse the card after a moment
+  setTimeout(() => {
+    const card = document.getElementById('apikey-card');
+    card.style.border = '1px solid var(--sage-mid)';
+    card.style.background = 'var(--sage-light)';
+    document.getElementById('apikey-msg').innerHTML = '<span style="color:var(--sage)">✓ API key saved — ready to generate.</span>';
+  }, 800);
+}
+
+function showError(msg) {
+  const existing = document.getElementById('gen-error');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.id = 'gen-error';
+  el.style.cssText = 'background:var(--cedar-light);border:1px solid #F0DADA;border-radius:var(--radius-sm);padding:14px 16px;font-size:14px;color:var(--cedar);margin-bottom:1rem;line-height:1.6';
+  el.innerHTML = `<strong>Generation stopped:</strong> ${esc(msg)}`;
+  document.getElementById('results-wrap').prepend(el);
+}
+
+function loadSavedKey() {
+  const key = localStorage.getItem('rcg_api_key');
+  if (key) {
+    document.getElementById('api-key-input').value = '••••••••••••••••••••••••' + key.slice(-4);
+    document.getElementById('apikey-msg').innerHTML = '<span style="color:var(--sage)">✓ API key saved — ready to generate.</span>';
+    const card = document.getElementById('apikey-card');
+    card.style.border = '1px solid var(--sage-mid)';
+    card.style.background = 'var(--sage-light)';
+  }
+}
+
+// ── Class year management ──
+let currentClassName = null;
+
+function getSavedClasses() {
+  try { return JSON.parse(localStorage.getItem('rcg_classes') || '[]'); } catch { return []; }
+}
+
+function saveCurrentClass() {
+  const name = document.getElementById('class-name-input').value.trim();
+  if (!name) return;
+  if (!students.length) {
+    document.getElementById('save-class-msg').innerHTML = '<span style="color:var(--cedar)">No students in the current roster to save.</span>';
+    return;
+  }
+  const classes = getSavedClasses();
+  const existing = classes.findIndex(c => c.name === name);
+  const entry = { name, savedAt: new Date().toLocaleDateString('en-CA'), students: JSON.parse(JSON.stringify(students)) };
+  if (existing >= 0) {
+    if (!confirm(`A class named "${name}" already exists. Replace it?`)) return;
+    classes[existing] = entry;
+  } else {
+    classes.unshift(entry);
+  }
+  localStorage.setItem('rcg_classes', JSON.stringify(classes));
+  currentClassName = name;
+  updateHeaderClass();
+  document.getElementById('save-class-msg').innerHTML = `<span style="color:var(--sage)">✓ "${esc(name)}" saved with ${students.length} student${students.length !== 1 ? 's' : ''}.</span>`;
+  document.getElementById('class-name-input').value = '';
+  document.getElementById('save-class-btn').disabled = true;
+  renderSavedClasses();
+}
+
+function startNewYear() {
+  const hasStudents = students.length > 0;
+  const msg = hasStudents
+    ? `This will clear all ${students.length} students from the roster. Have you saved the current class? This cannot be undone.`
+    : 'The roster is already empty. Continue?';
+  if (!confirm(msg)) return;
+  students = []; genResults = {};
+  currentClassName = null;
+  updateHeaderClass();
+  renderRoster();
+  refreshGenView();
+  document.getElementById('save-class-msg').innerHTML = '';
+  showTab('students');
+}
+
+function loadClass(name) {
+  if (students.length && !confirm(`Loading "${name}" will replace your current ${students.length} student${students.length !== 1 ? 's' : ''}. Continue?`)) return;
+  const classes = getSavedClasses();
+  const entry = classes.find(c => c.name === name);
+  if (!entry) return;
+  students = JSON.parse(JSON.stringify(entry.students));
+  genResults = {};
+  currentClassName = name;
+  updateHeaderClass();
+  renderRoster();
+  refreshGenView();
+  // Pre-fill the class name input for easy re-save
+  document.getElementById('class-name-input').value = name;
+  document.getElementById('save-class-btn').disabled = false;
+  showTab('students');
+}
+
+function deleteClass(name) {
+  if (!confirm(`Delete the saved class "${name}"? This cannot be undone.`)) return;
+  const classes = getSavedClasses().filter(c => c.name !== name);
+  localStorage.setItem('rcg_classes', JSON.stringify(classes));
+  if (currentClassName === name) { currentClassName = null; updateHeaderClass(); }
+  renderSavedClasses();
+}
+
+function renderSavedClasses() {
+  const classes = getSavedClasses();
+  const el = document.getElementById('saved-classes-list');
+  if (!classes.length) {
+    el.innerHTML = `<div class="empty-state" style="padding:1.5rem 0"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div>No classes saved yet.</div><div style="font-size:12px;margin-top:4px">Save your current class above to create your first archive.</div></div>`;
+    return;
+  }
+  el.innerHTML = classes.map(c => `
+    <div class="student-item" style="margin-bottom:8px">
+      <div>
+        <div class="s-name">${esc(c.name)}${currentClassName === c.name ? ' <span style="font-size:11px;font-weight:400;color:var(--sage);margin-left:6px">● active</span>' : ''}</div>
+        <div class="s-meta">${c.students.length} student${c.students.length !== 1 ? 's' : ''} · saved ${esc(c.savedAt)}</div>
+      </div>
+      <div class="s-badges">
+        <button class="btn btn-sm" onclick="loadClass(${JSON.stringify(c.name)})">
+          <svg viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;stroke:currentColor;fill:none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Load
+        </button>
+        <button class="btn btn-sm btn-danger" onclick="deleteClass(${JSON.stringify(c.name)})">
+          <svg viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;stroke:currentColor;fill:none"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+function updateHeaderClass() {
+  const el = document.getElementById('header-class');
+  el.textContent = currentClassName ? `📋 ${currentClassName}` : 'No class loaded';
+  el.style.color = currentClassName ? 'var(--sage)' : 'var(--ink-light)';
+}
+
+// Init
+buildRefChips();
+buildCSVTemplate();
+renderRoster();
+loadSavedKey();
+renderSavedClasses();
+updateHeaderClass();
+</script>
+</body>
+</html>
