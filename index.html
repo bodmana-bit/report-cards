@@ -118,13 +118,25 @@ textarea { resize: vertical; line-height: 1.6; }
 .callout-info { background: var(--sky-light); color: #2E5F82; border-color: #B8D4E9; }
 .callout-success { background: var(--sage-light); color: var(--sage); border-color: var(--sage-mid); }
 
+/* Subject notes + nine-section results */
+.subjects { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.subjects .field { margin-bottom: 0; }
+.subjects label { color: var(--sage); }
+.sec-block { border-top: 1px solid var(--border-light); padding: 12px 0 2px; }
+.sec-block:first-of-type { border-top: none; padding-top: 0; }
+.sec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.sec-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; color: var(--sage); }
+.sec-head .btn { margin-left: auto; }
+.gen-tag { font-size: 10px; padding: 1px 7px; border-radius: 100px; background: #F5EFD8; color: #7A6113; border: 1px solid #E6DAAE; font-weight: 500; }
+.result-text.general { border-style: dashed; color: var(--ink-mid); }
+
 .csv-area { font-family: 'Courier New', monospace; font-size: 12px; height: 150px; background: #F5F7F5; }
 .gen-opts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 1rem; }
 
 @media (max-width: 700px) {
   .sidebar { display: none; }
   .main { padding: 1.25rem; }
-  .form-row, .form-row-3, .gen-opts { grid-template-columns: 1fr; }
+  .form-row, .form-row-3, .gen-opts, .subjects { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -188,20 +200,12 @@ textarea { resize: vertical; line-height: 1.6; }
       <div class="card">
         <div class="card-title">Add a student</div>
 
-        <!-- Name row -->
+        <!-- Name + pronouns -->
         <div class="form-row">
           <div class="field">
             <label>First name *</label>
             <input type="text" id="s-fname" placeholder="e.g. Emma">
           </div>
-          <div class="field">
-            <label>Last name *</label>
-            <input type="text" id="s-lname" placeholder="e.g. Thompson">
-          </div>
-        </div>
-
-        <!-- Pronouns + grade + term + progress -->
-        <div class="form-row">
           <div class="field">
             <label>Pronouns</label>
             <select id="s-pronouns">
@@ -210,6 +214,10 @@ textarea { resize: vertical; line-height: 1.6; }
               <option value="they/them">they / them</option>
             </select>
           </div>
+        </div>
+
+        <!-- Grade + term + progress -->
+        <div class="form-row-3">
           <div class="field">
             <label>Grade</label>
             <select id="s-grade">
@@ -217,8 +225,6 @@ textarea { resize: vertical; line-height: 1.6; }
               <option>Grade 2</option>
             </select>
           </div>
-        </div>
-        <div class="form-row">
           <div class="field">
             <label>Term</label>
             <select id="s-term">
@@ -284,15 +290,9 @@ textarea { resize: vertical; line-height: 1.6; }
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="field">
-            <label>Literacy note <span class="label-opt">optional</span></label>
-            <input type="text" id="s-literacy" placeholder="e.g. reading at Level E, working on blends">
-          </div>
-          <div class="field">
-            <label>Numeracy note <span class="label-opt">optional</span></label>
-            <input type="text" id="s-numeracy" placeholder="e.g. skip counting to 100, learning addition">
-          </div>
+        <div class="field">
+          <label>Subject notes <span class="label-opt">— a few words each; a blank subject gets a general comment</span></label>
+          <div class="subjects" id="subject-fields"></div>
         </div>
         <div class="field">
           <label>Additional notes <span class="label-opt">optional</span></label>
@@ -348,7 +348,7 @@ textarea { resize: vertical; line-height: 1.6; }
     <!-- GENERATE TAB -->
     <div class="section" id="sec-generate">
       <h1 class="page-title">Generate comments</h1>
-      <p class="page-sub">Choose your options below, then generate. Each comment is written individually — no two will be the same.</p>
+      <p class="page-sub">Choose your options below, then generate. Each child gets nine comments — one per subject — written together so they don't repeat each other.</p>
 
       <div id="gen-empty-msg" style="display:none">
         <div class="callout callout-info">
@@ -401,15 +401,15 @@ textarea { resize: vertical; line-height: 1.6; }
               </select>
             </div>
             <div class="field" style="margin-bottom:0">
-              <label>Comment length</label>
+              <label>Length <span class="label-opt">per subject</span></label>
               <select id="opt-length">
-                <option value="3–4 sentences">Short (3–4 sentences)</option>
-                <option value="5–6 sentences" selected>Medium (5–6 sentences)</option>
-                <option value="a short paragraph of 7–8 sentences">Longer (7–8 sentences)</option>
+                <option value="1–2 sentences">Short (1–2 sentences)</option>
+                <option value="2–3 sentences" selected>Medium (2–3 sentences)</option>
+                <option value="4–5 sentences">Longer (4–5 sentences)</option>
               </select>
             </div>
             <div class="field" style="margin-bottom:0">
-              <label>Teacher name <span class="label-opt">optional</span></label>
+              <label>Teacher name <span class="label-opt">optional — signs Goals</span></label>
               <input type="text" id="opt-teacher" placeholder="e.g. Ms. Reyes">
             </div>
           </div>
@@ -542,11 +542,11 @@ textarea { resize: vertical; line-height: 1.6; }
           </div>
           <div style="display:flex;gap:14px;align-items:flex-start">
             <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">3</div>
-            <div>Go to <strong>Generate</strong>, choose tone and length, and click "Generate all report cards." The AI writes each comment individually.</div>
+            <div>Go to <strong>Generate</strong>, choose tone and length, and click "Generate all report cards." Each child gets nine comments: Language Arts, Math, Physical and Health Education, Applied Skills/Design/Technology, Science, Social Studies, Art, Career Education, and Goals.</div>
           </div>
           <div style="display:flex;gap:14px;align-items:flex-start">
             <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">4</div>
-            <div>Use the <strong>Copy</strong> button per student, or <strong>Copy all</strong> to grab every comment at once. Paste directly into your report card system.</div>
+            <div>Use the <strong>Copy</strong> button beside each subject, <strong>Copy all nine</strong> per student, or <strong>Copy all</strong> to grab every comment at once. Paste directly into your report card system.</div>
           </div>
           <div style="display:flex;gap:14px;align-items:flex-start">
             <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">5</div>
@@ -559,7 +559,10 @@ textarea { resize: vertical; line-height: 1.6; }
         <div class="card-title">Tips for better comments</div>
         <ul style="font-size:14px;line-height:1.9;color:var(--ink-mid);padding-left:1.25rem">
           <li>The more specific your strengths and growth notes, the more tailored the comment.</li>
-          <li>Literacy and numeracy notes are woven in naturally — include specific reading levels or strategies if you have them.</li>
+          <li>A few words per subject is plenty — "reading at Level D, working on blends" anchors a whole Language Arts comment.</li>
+          <li>A subject left blank gets an honest, general comment (marked <em>general</em>) — the AI is told never to invent a project, reading level or outing it wasn't given.</li>
+          <li>Goals is written as next steps for the term ahead, so fuller subject notes make for more concrete goals.</li>
+          <li>Only first names are used. If two children share a first name, type "Emma T." as the first name.</li>
           <li>Select 2–4 personality qualities per student for the best balance.</li>
           <li>You can add your own custom qualities using the "Add" input — they'll be remembered for that student.</li>
           <li>If a comment doesn't feel right, click "Regenerate all" to rewrite the full set.</li>
@@ -589,6 +592,59 @@ const DEFAULT_QUALITIES = [
   'caring leader','loves to help others','loves outdoor learning'
 ];
 
+// ── Report card subjects (in report order) ──
+const SUBJECTS = [
+  { k: 'language_arts',  l: 'Language Arts',                          p: 'e.g. reading at Level D, working on sight words',
+    a: ['languagearts','la','ela','literacy','english','literacynote'] },
+  { k: 'math',           l: 'Math',                                   p: 'e.g. counting to 30, learning addition',
+    a: ['math','maths','mathematics','numeracy','numeracynote'] },
+  { k: 'phys_health',    l: 'Physical and Health Education',          p: 'e.g. confident in games, learning to take turns',
+    a: ['physicalandhealtheducation','physicalhealtheducation','phe','pe','physicaleducation'] },
+  { k: 'applied_skills', l: 'Applied Skills, Design, and Technology', p: 'e.g. careful with tools, built a strong bridge',
+    a: ['appliedskillsdesignandtechnology','appliedskillsdesigntechnology','appliedskills','adst'] },
+  { k: 'science',        l: 'Science',                                p: 'e.g. full of questions during the magnets unit',
+    a: ['science'] },
+  { k: 'social_studies', l: 'Social Studies',                         p: 'e.g. thoughtful in talks about community',
+    a: ['socialstudies','socials'] },
+  { k: 'art',            l: 'Art',                                    p: 'e.g. bold with colour, finishes pieces with care',
+    a: ['art','arts','visualarts','finearts'] },
+  { k: 'career_ed',      l: 'Career Education',                       p: 'e.g. takes on classroom jobs, proud of helping',
+    a: ['careereducation','career','careered'] },
+  { k: 'goals',          l: 'Goals',                                  p: 'e.g. wants to read a chapter book, practising printing',
+    a: ['goals','goal','nextsteps'] }
+];
+const KEYS = SUBJECTS.map(s => s.k);
+
+function buildSubjectFields() {
+  document.getElementById('subject-fields').innerHTML = SUBJECTS.map(s => `
+    <div class="field">
+      <label for="n-${s.k}">${esc(s.l)}</label>
+      <input type="text" id="n-${s.k}" placeholder="${esc(s.p)}">
+    </div>`).join('');
+}
+
+// Brings any student record — including ones saved before this update, which
+// had a last name and Literacy/Numeracy notes — into the current shape.
+function normalizeStudent(raw) {
+  const s = Object.assign({}, raw);
+  s.fname = String(s.fname || (s.fullName || '').split(' ')[0] || '').trim();
+  delete s.lname; delete s.fullName;
+  s.subjects = Object.assign({}, s.subjects || {});
+  if (!s.subjects.language_arts && s.literacy) s.subjects.language_arts = s.literacy;
+  if (!s.subjects.math && s.numeracy) s.subjects.math = s.numeracy;
+  delete s.literacy; delete s.numeracy;
+  KEYS.forEach(k => { s.subjects[k] = String(s.subjects[k] || '').trim(); });
+  return s;
+}
+
+function normPronouns(raw) {
+  const v = String(raw || '').toLowerCase().replace(/\s+/g, '');
+  if (['she/her','she','her','f','female'].includes(v)) return 'she/her';
+  if (['he/him','he','him','his','m','male'].includes(v)) return 'he/him';
+  if (['they/them','they','them','their'].includes(v)) return 'they/them';
+  return null;
+}
+
 // Build reference chips on spreadsheet tab
 function buildRefChips() {
   const el = document.getElementById('ref-chips');
@@ -606,11 +662,20 @@ function copyQuality(q, el) {
 }
 
 // Build CSV template dynamically
+function csvCell(v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+
 function buildCSVTemplate() {
-  const header = 'First Name,Last Name,Pronouns,Grade,Term,Overall Progress,Strengths,Areas for Growth,Personality Qualities,Literacy Note,Numeracy Note,Additional Notes,Personal Accomplishments';
-  const ex1 = 'Emma,Thompson,she/her,Grade 1,Term 1 (Fall),progressing well,"loves reading, excellent listener","working on number formation","enthusiastic, kind & caring","reading at Level D, working on sight words","counting to 30, learning addition","thrives during partner work","completed her first chapter book"';
-  const ex2 = 'Liam,Nakamura,he/him,Grade 2,Term 1 (Fall),meeting expectations,"strong with math, curious","building writing stamina","hardworking, playful","reading at Level F","skip counting to 100","very engaged during outdoor learning","earned the kindness award at the winter assembly"';
-  document.getElementById('csv-template').value = [header, ex1, ex2].join('\n');
+  const header = ['First Name','Pronouns','Grade','Term','Overall Progress','Strengths','Areas for Growth','Personality Qualities']
+    .concat(SUBJECTS.map(s => s.l)).concat(['Additional Notes','Personal Accomplishments']);
+  const ex1 = ['Emma','she/her','Grade 1','Term 1 (Fall)','progressing well','loves reading, excellent listener','working on number formation','enthusiastic, kind & caring',
+    'reading at Level D, working on sight words','counting to 30, learning addition','confident in games, learning to take turns','careful with tools',
+    'full of questions in the magnets unit','thoughtful in talks about community','bold with colour','takes on classroom jobs willingly','wants to read a chapter book',
+    'thrives during partner work','completed her first chapter book'];
+  const ex2 = ['Liam','he/him','Grade 2','Term 1 (Fall)','meeting expectations','strong with math, curious','building writing stamina','hardworking, playful',
+    'reading at Level F','skip counting to 100','loves team games','built a sturdy bridge in the design challenge',
+    'a careful observer','curious about local history','experiments with materials','proud of helping younger buddies','practising printing at home',
+    'very engaged during outdoor learning','earned the kindness award at the winter assembly'];
+  document.getElementById('csv-template').value = [header, ex1, ex2].map(r => r.map(csvCell).join(',')).join('\n');
 }
 
 // ── Tab navigation ──
@@ -661,13 +726,13 @@ function getSelectedQualities() {
 // ── Form ──
 function addStudent() {
   const fname = document.getElementById('s-fname').value.trim();
-  const lname = document.getElementById('s-lname').value.trim();
   if (!fname) { alert('Please enter a first name.'); return; }
-  if (!lname) { alert('Please enter a last name.'); return; }
+  const subjects = {};
+  KEYS.forEach(k => { subjects[k] = document.getElementById('n-' + k).value.trim(); });
   students.push({
     id: Date.now() + Math.random(),
-    fname, lname,
-    fullName: fname + ' ' + lname,
+    fname,
+    subjects,
     pronouns: document.getElementById('s-pronouns').value,
     grade: document.getElementById('s-grade').value,
     term: document.getElementById('s-term').value,
@@ -675,8 +740,6 @@ function addStudent() {
     strengths: document.getElementById('s-strengths').value.trim(),
     growth: document.getElementById('s-growth').value.trim(),
     qualities: getSelectedQualities(),
-    literacy: document.getElementById('s-literacy').value.trim(),
-    numeracy: document.getElementById('s-numeracy').value.trim(),
     notes: document.getElementById('s-notes').value.trim(),
     accomplishments: document.getElementById('s-accomplishments').value.trim(),
   });
@@ -685,7 +748,8 @@ function addStudent() {
 }
 
 function clearForm() {
-  ['s-fname','s-lname','s-strengths','s-growth','s-literacy','s-numeracy','s-notes','s-accomplishments'].forEach(id => document.getElementById(id).value = '');
+  ['s-fname','s-strengths','s-growth','s-notes','s-accomplishments'].concat(KEYS.map(k => 'n-' + k))
+    .forEach(id => document.getElementById(id).value = '');
   document.querySelectorAll('#quality-chips .chip').forEach(c => {
     if (c.classList.contains('custom')) { c.remove(); } else { c.classList.remove('on'); }
   });
@@ -708,15 +772,17 @@ function renderRoster() {
     el.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg><div>No students added yet.</div><div style="font-size:12px;margin-top:4px">Fill in the form above, or import from the Spreadsheet tab.</div></div>`;
     return;
   }
+  const seen = {}, dup = {};
+  students.forEach(s => { const k = s.fname.toLowerCase(); if (seen[k]) dup[k] = 1; seen[k] = 1; });
   el.innerHTML = students.map(s => `
     <div class="student-item">
       <div>
-        <div class="s-name">${esc(s.fullName)}</div>
-        <div class="s-meta">${esc(s.grade)} · ${esc(s.term)} · ${esc(s.pronouns)}</div>
+        <div class="s-name">${esc(s.fname)}${dup[s.fname.toLowerCase()] ? ' <span class="gen-tag">same first name</span>' : ''}</div>
+        <div class="s-meta">${esc(s.grade)} · ${esc(s.term)} · ${esc(s.pronouns)} · ${KEYS.filter(k => s.subjects[k]).length}/9 subject notes</div>
       </div>
       <div class="s-badges">
         <span class="badge ${genResults[s.id] ? 'badge-done' : 'badge-pending'}">${genResults[s.id] ? '✓ done' : 'pending'}</span>
-        <button class="btn btn-sm btn-danger" onclick="removeStudent(${JSON.stringify(s.id)})" title="Remove ${esc(s.fullName)}">
+        <button class="btn btn-sm btn-danger" onclick="removeStudent(${JSON.stringify(s.id)})" title="Remove ${esc(s.fname)}">
           <svg viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;stroke:currentColor;fill:none"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         </button>
       </div>
@@ -757,40 +823,40 @@ async function generateAll() {
     return;
   }
 
-  const systemPrompt = `You are an experienced, thoughtful BC primary school teacher at Hans Helgeson Elementary School in Metchosin, British Columbia writing individual student progress report comments. You have a gift for noticing what makes each child genuinely unique and expressing it in writing that parents will treasure.
+  const systemPrompt = `You are an experienced, thoughtful BC primary school teacher at Hans Helgeson Elementary School in Metchosin, British Columbia, writing the nine progress report sections for ONE child. You have a gift for noticing what makes each child genuinely unique and expressing it in writing that parents will treasure.
 
-Your comments follow these non-negotiable principles:
+The nine sections, in order: ${SUBJECTS.map(s => s.l).join('; ')}.
 
 VOICE & TONE
 - Warm, professional, and sincere — the kind of writing a parent reads and thinks "she really knows my child"
 - Conversational but polished. Readable aloud. Never stiff or bureaucratic.
 - Avoid hollow praise words like "wonderful", "amazing", "fantastic", "superb" — show the quality through specific detail instead
-- Never use the same opening word or phrase twice across a set of reports. Vary sentence structure throughout.
+- Use only the child's first name, and sparingly: at most once per section, and never to open more than one section. Pronouns carry the rest.
 
-UNIQUENESS
-- Every comment must feel written specifically for this one child — not a template with a name swapped in
-- Draw directly from the specific details provided. Anchor every claim in something concrete.
-- If two students share a strength (e.g. "loves reading"), the comments must still sound completely different in how that strength is described and contextualised
-- Vary your sentence openings, rhythm, and structure so no two comments read alike
+ACROSS THE NINE SECTIONS
+- No two sections open with the same word or sentence shape.
+- No observation, phrase or anecdote appears in more than one section.
+- Each section is clearly about its own subject — a comment that would fit under any heading has failed.
+
+GROUNDING — THE HARD RULE
+- Where a subject note is given, anchor that section in it and stay within what it says.
+- Where a subject has NO note, write briefly and generally from the child's overall profile, strengths and qualities. Do NOT invent activities, projects, assessments, reading levels, incidents or events.
+- Class events and projects are shared by every child in the room: draw on them in at most two sections, only where they genuinely fit this child.
 
 BC PRIMARY CURRICULUM ALIGNMENT
 - Progress reports describe the learning journey — never use letter grades, percentages, or ranking language
 - Use BC curriculum language naturally: "developing", "demonstrating", "applying", "exploring", "building on"
 - Frame growth areas with a constructive, forward-looking lens — never deficit language
-- Acknowledge the whole child: academic skills, social-emotional development, curiosity, and character
 
-STRUCTURE (for the length requested)
-- Open with something specific and vivid about this student — not a generic opener
-- Weave literacy and/or numeracy details in naturally if provided — don't list them separately
-- Acknowledge at least one growth area with sensitivity and optimism
-- Close with a genuine, personalised forward-looking statement — not a generic "keep up the great work"
+THE GOALS SECTION
+- Not a summary. One or two concrete, encouraging next steps for the term ahead that the child and family can act on, growing naturally out of the other sections and the areas for growth.
 
-OUTPUT: Return only the comment text. No label, no preamble, no sign-off unless instructed.`;
+OUTPUT: Return ONLY a JSON object with exactly these nine keys: ${KEYS.join(', ')}. Each value is that section's comment as a plain string. No markdown, no code fences, no extra keys, no commentary.`;
 
   for (let i = 0; i < students.length; i++) {
     const s = students[i];
     progFill.style.width = Math.round((i / students.length) * 100) + '%';
-    status.textContent = `Generating ${i + 1} of ${students.length}: ${s.fullName}…`;
+    status.textContent = `Generating ${i + 1} of ${students.length}: ${s.fname}…`;
 
     const pronounSubj = s.pronouns === 'she/her' ? 'She' : s.pronouns === 'he/him' ? 'He' : 'They';
     const pronounObj  = s.pronouns === 'she/her' ? 'her' : s.pronouns === 'he/him' ? 'him' : 'them';
@@ -799,26 +865,29 @@ OUTPUT: Return only the comment text. No label, no preamble, no sign-off unless 
     const classEvents = document.getElementById('class-events').value.trim();
     const classProjects = document.getElementById('class-projects').value.trim();
 
-    const userPrompt = `Write a progress report comment for ${s.fname} ${s.lname}, a ${s.grade} student. Length: ${length}. Tone: ${tone}.
+    const subjectNotes = SUBJECTS.map(sub =>
+      `- ${sub.l}: ${s.subjects[sub.k] || 'NO NOTE — keep general, invent nothing'}`).join('\n');
+
+    const userPrompt = `Write the nine report card sections for ${s.fname}, a ${s.grade} student. Length: ${length} per section. Tone: ${tone}.
 
 Student profile:
-- Full name: ${s.fname} ${s.lname} (use first name only in the comment)
-- Pronouns: ${s.pronouns} (use ${pronounSubj}/${pronounObj}/${pronounPoss} throughout)
+- First name: ${s.fname}
+- Pronouns: ${s.pronouns} (use ${pronounSubj}/${pronounObj}/${pronounPoss} throughout — never any other pronouns for this child)
 - Term: ${s.term}
 - Overall progress: ${s.progress}
 - Strengths: ${s.strengths || 'not specified'}
 - Areas for growth: ${s.growth || 'not specified'}
 - Personality & social qualities: ${s.qualities || 'not specified'}
-- Literacy note: ${s.literacy || 'not provided'}
-- Numeracy note: ${s.numeracy || 'not provided'}
 - Personal accomplishments this term: ${s.accomplishments || 'none noted'}
 - Additional context: ${s.notes || 'none'}
 
-Class context (shared by all students — reference naturally where relevant, not for every student):
+Teacher's notes per subject:
+${subjectNotes}
+
+Class context (shared by all students — at most two sections, only where it fits):
 - Class events & field trips: ${classEvents || 'none noted'}
 - Class projects & accomplishments: ${classProjects || 'none noted'}
-
-Important: Do not open with "${s.fname}" as the very first word. Do not use hollow superlatives. Make this comment feel like it could only ever be about ${s.fname}. Weave in class events or projects only where they feel natural and specific to this student's experience — not as a checklist.${teacher ? ` End with: — ${teacher}` : ''}`;
+${teacher ? `\nEnd the Goals section with: — ${teacher}` : ''}`;
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -831,7 +900,7 @@ Important: Do not open with "${s.fname}" as the very first word. Do not use holl
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
+          max_tokens: 4000,
           system: systemPrompt,
           messages: [{ role: 'user', content: userPrompt }]
         })
@@ -844,23 +913,11 @@ Important: Do not open with "${s.fname}" as the very first word. Do not use holl
         if (res.status === 402) throw new Error('Insufficient API credits — please add credit at console.anthropic.com.');
         throw new Error(errMsg);
       }
-      const text = data.content?.find(b => b.type === 'text')?.text || 'Error generating comment — please try again.';
-      genResults[s.id] = text;
-
-      resultsWrap.innerHTML += `
-        <div class="result-card" id="rc-${i}">
-          <div class="result-header">
-            <div>
-              <div class="result-name">${esc(s.fullName)}</div>
-              <div class="result-meta">${esc(s.grade)} · ${esc(s.term)} · ${esc(s.pronouns)}</div>
-            </div>
-            <button class="btn btn-sm" onclick="copySingle(${JSON.stringify(s.id)}, this)">
-              <svg viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;stroke:currentColor;fill:none"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              Copy
-            </button>
-          </div>
-          <div class="result-text" id="rt-${s.id}">${esc(text)}</div>
-        </div>`;
+      const raw = data.content?.find(b => b.type === 'text')?.text || '';
+      const sections = parseSections(raw);
+      if (!sections) throw new Error('The reply came back unreadable — click Regenerate to try again.');
+      genResults[s.id] = sections;
+      resultsWrap.insertAdjacentHTML('beforeend', resultCardHTML(s, i));
     } catch (e) {
       const errText = e.message || 'Unknown error';
       // If it's an auth/credit error, stop the whole run
@@ -872,34 +929,87 @@ Important: Do not open with "${s.fname}" as the very first word. Do not use holl
         showError(errText);
         return;
       }
-      resultsWrap.innerHTML += `<div class="result-card"><div class="result-name">${esc(s.fullName)}</div><div style="color:var(--cedar);font-size:13px;margin-top:6px;background:var(--cedar-light);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid #F0DADA"><strong>Could not generate:</strong> ${esc(errText)}</div></div>`;
+      resultsWrap.insertAdjacentHTML('beforeend', `<div class="result-card"><div class="result-name">${esc(s.fname)}</div><div style="color:var(--cedar);font-size:13px;margin-top:6px;background:var(--cedar-light);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid #F0DADA"><strong>Could not generate:</strong> ${esc(errText)}</div></div>`);
     }
     await sleep(250);
   }
 
   progFill.style.width = '100%';
-  status.textContent = `Done! ${students.length} comment${students.length !== 1 ? 's' : ''} generated.`;
+  status.textContent = `Done! ${students.length} student${students.length !== 1 ? 's' : ''} written — nine comments each.`;
   btn.disabled = false;
   btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:currentColor;fill:none"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg> Regenerate all';
   document.getElementById('copy-all-btn').style.display = 'inline-flex';
   renderRoster();
 }
 
+// Pulls the nine sections out of the model's reply, tolerating stray code fences
+// or a sentence before/after the JSON.
+function parseSections(raw) {
+  let txt = String(raw || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+  const a = txt.indexOf('{'), b = txt.lastIndexOf('}');
+  if (a < 0 || b <= a) return null;
+  let obj;
+  try { obj = JSON.parse(txt.slice(a, b + 1)); } catch { return null; }
+  const out = {}; let got = 0;
+  KEYS.forEach(k => { out[k] = String(obj[k] || '').trim(); if (out[k]) got++; });
+  return got ? out : null;
+}
+
+const COPY_ICON = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;stroke:currentColor;fill:none"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+function resultCardHTML(s, i) {
+  const r = genResults[s.id];
+  const id = JSON.stringify(s.id);
+  return `
+    <div class="result-card" id="rc-${i}">
+      <div class="result-header">
+        <div>
+          <div class="result-name">${esc(s.fname)}</div>
+          <div class="result-meta">${esc(s.grade)} · ${esc(s.term)} · ${esc(s.pronouns)}</div>
+        </div>
+        <button class="btn btn-sm" onclick='copySingle(${id}, this)'>${COPY_ICON} Copy all nine</button>
+      </div>
+      ${SUBJECTS.map(sub => {
+        const general = !s.subjects[sub.k];
+        return `<div class="sec-block">
+          <div class="sec-head">
+            <span class="sec-label">${esc(sub.l)}</span>
+            ${general ? '<span class="gen-tag" title="No note was entered for this subject, so the comment is kept general">general</span>' : ''}
+            <button class="btn btn-sm" onclick='copySection(${id}, "${sub.k}", this)'>${COPY_ICON} Copy</button>
+          </div>
+          <div class="result-text${general ? ' general' : ''}">${esc(r[sub.k] || '—')}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function studentText(s) {
+  const r = genResults[s.id];
+  if (!r) return null;
+  return `${s.fname} (${s.grade} · ${s.term})\n\n` + SUBJECTS.map(sub => `${sub.l}\n${r[sub.k] || '—'}`).join('\n\n');
+}
+
+function flashCopied(btn) {
+  const orig = btn.innerHTML;
+  btn.textContent = '✓ Copied!';
+  setTimeout(() => btn.innerHTML = orig, 2000);
+}
+
+function copySection(id, key, btn) {
+  const r = genResults[id];
+  if (!r || !r[key]) return;
+  navigator.clipboard.writeText(r[key]).then(() => flashCopied(btn));
+}
+
 function copySingle(id, btn) {
-  const text = genResults[id];
+  const s = students.find(x => x.id === id);
+  const text = s && studentText(s);
   if (!text) return;
-  navigator.clipboard.writeText(text).then(() => {
-    const orig = btn.innerHTML;
-    btn.textContent = '✓ Copied!';
-    setTimeout(() => btn.innerHTML = orig, 2000);
-  });
+  navigator.clipboard.writeText(text).then(() => flashCopied(btn));
 }
 
 function copyAllResults() {
-  const all = students.map(s => {
-    const t = genResults[s.id];
-    return t ? `${s.fullName} (${s.grade} · ${s.term})\n${t}` : null;
-  }).filter(Boolean).join('\n\n---\n\n');
+  const all = students.map(studentText).filter(Boolean).join('\n\n---\n\n');
   navigator.clipboard.writeText(all).then(() => {
     const btn = document.getElementById('copy-all-btn');
     btn.textContent = '✓ All copied!';
@@ -925,55 +1035,74 @@ function importCSV() {
   const raw = document.getElementById('csv-import').value.trim();
   const msg = document.getElementById('import-msg');
   if (!raw) { msg.innerHTML = '<span style="color:var(--cedar)">Please paste your CSV data first.</span>'; return; }
-  const lines = raw.split('\n').filter(l => l.trim());
-  if (lines.length < 2) { msg.innerHTML = '<span style="color:var(--cedar)">Need at least a header row and one student row.</span>'; return; }
+  const rows = parseCSV(raw);
+  if (rows.length < 2) { msg.innerHTML = '<span style="color:var(--cedar)">Need at least a header row and one student row.</span>'; return; }
 
-  const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
-  const idx = k => headers.findIndex(h => h.includes(k));
-  const fni = idx('first'), lni = idx('last'), pi = idx('pronoun'), gi = idx('grade'),
-    ti = idx('term'), oi = idx('progress'), si = idx('strength'), ai = idx('growth'),
-    qi = idx('quality'), li = idx('literacy'), mi = idx('numeracy'), xi = idx('additional'),
-    acci = idx('accomplish');
+  // Match columns by exact (normalised) header name, so "Language Arts" can't be
+  // mistaken for "Art". Each column is used once.
+  const norm = h => String(h || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const heads = rows[0].map(norm), used = {};
+  const col = names => { for (const n of names) { const at = heads.indexOf(n); if (at > -1 && !used[at]) { used[at] = 1; return at; } } return -1; };
+  const fni = col(['firstname','first','name','student','studentname']);
+  if (fni < 0) { msg.innerHTML = '<span style="color:var(--cedar)">No <strong>First Name</strong> column found — use the template header row.</span>'; return; }
+  col(['lastname','last','surname']); // older sheets: recognised, then ignored
+  const pi = col(['pronouns','pronoun']), gi = col(['grade']), ti = col(['term']),
+    oi = col(['overallprogress','progress']), si = col(['strengths','strength']),
+    ai = col(['areasforgrowth','growth','areaforgrowth']), qi = col(['personalityqualities','qualities','personality']),
+    xi = col(['additionalnotes','additional','notes']), acci = col(['personalaccomplishments','accomplishments']);
+  const subjCols = {};
+  SUBJECTS.forEach(sub => { subjCols[sub.k] = col(sub.a); });
 
-  let added = 0;
-  for (let i = 1; i < lines.length; i++) {
-    const cols = parseCSVLine(lines[i]);
-    const fname = cols[fni]?.trim();
-    const lname = cols[lni]?.trim() || '';
+  const get = (cols, at) => at < 0 ? '' : String(cols[at] == null ? '' : cols[at]).trim();
+  let added = 0; const badPron = [];
+  for (let i = 1; i < rows.length; i++) {
+    const cols = rows[i];
+    const fname = get(cols, fni);
     if (!fname) continue;
+    const rawP = get(cols, pi), p = normPronouns(rawP);
+    if (!p) badPron.push(fname);
+    const subjects = {};
+    KEYS.forEach(k => { subjects[k] = get(cols, subjCols[k]); });
     students.push({
       id: Date.now() + i + Math.random(),
-      fname, lname,
-      fullName: lname ? fname + ' ' + lname : fname,
-      pronouns: cols[pi]?.trim() || 'she/her',
-      grade: cols[gi]?.trim() || 'Grade 1',
-      term: cols[ti]?.trim() || 'Term 1 (Fall)',
-      progress: cols[oi]?.trim() || 'progressing well',
-      strengths: cols[si]?.trim() || '',
-      growth: cols[ai]?.trim() || '',
-      qualities: cols[qi]?.trim() || '',
-      literacy: cols[li]?.trim() || '',
-      numeracy: cols[mi]?.trim() || '',
-      notes: cols[xi]?.trim() || '',
-      accomplishments: cols[acci]?.trim() || '',
+      fname,
+      subjects,
+      pronouns: p || 'they/them',
+      grade: get(cols, gi) || 'Grade 1',
+      term: get(cols, ti) || 'Term 1 (Fall)',
+      progress: get(cols, oi) || 'progressing well',
+      strengths: get(cols, si),
+      growth: get(cols, ai),
+      qualities: get(cols, qi),
+      notes: get(cols, xi),
+      accomplishments: get(cols, acci),
     });
     added++;
   }
-  msg.innerHTML = `<span style="color:var(--sage)">✓ Imported ${added} student${added !== 1 ? 's' : ''} successfully.</span>`;
+  const missing = SUBJECTS.filter(sub => subjCols[sub.k] < 0).map(sub => sub.l);
+  let html = `<div style="color:var(--sage)">✓ Imported ${added} student${added !== 1 ? 's' : ''}.</div>`;
+  if (badPron.length) html += `<div style="color:var(--cedar);margin-top:6px">Pronouns not recognised for ${esc(badPron.join(', '))} — set to they/them. Use she/her, he/him or they/them.</div>`;
+  if (missing.length) html += `<div style="color:var(--cedar);margin-top:6px">No column for: ${esc(missing.join(', '))}. Those comments will be general.</div>`;
+  msg.innerHTML = html;
   renderRoster();
-  setTimeout(() => showTab('students'), 1200);
+  if (!badPron.length && !missing.length) setTimeout(() => showTab('students'), 1200);
 }
 
-function parseCSVLine(line) {
-  const result = []; let cur = ''; let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-    else { cur += c; }
+// Handles quoted cells, including commas and line breaks inside quotes.
+function parseCSV(text) {
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+      else cur += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+    else if (c !== '\r') cur += c;
   }
-  result.push(cur);
-  return result.map(v => v.replace(/^"|"$/g, ''));
+  row.push(cur); rows.push(row);
+  return rows.filter(r => r.some(v => String(v).trim() !== ''));
 }
 
 function clearAll() {
@@ -1090,7 +1219,7 @@ function loadClass(name) {
   const classes = getSavedClasses();
   const entry = classes.find(c => c.name === name);
   if (!entry) return;
-  students = JSON.parse(JSON.stringify(entry.students));
+  students = JSON.parse(JSON.stringify(entry.students)).map(normalizeStudent);
   genResults = {};
   currentClassName = name;
   updateHeaderClass();
@@ -1142,6 +1271,7 @@ function updateHeaderClass() {
 }
 
 // Init
+buildSubjectFields();
 buildRefChips();
 buildCSVTemplate();
 renderRoster();
