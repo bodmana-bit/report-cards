@@ -291,7 +291,7 @@ textarea { resize: vertical; line-height: 1.6; }
         </div>
 
         <div class="field">
-          <label>Subject notes <span class="label-opt">— a few words each; a blank subject gets a general comment</span></label>
+          <label>Subject notes <span class="label-opt">— a few words each; a blank subject gets a short, plain comment</span></label>
           <div class="subjects" id="subject-fields"></div>
         </div>
         <div class="field">
@@ -348,7 +348,7 @@ textarea { resize: vertical; line-height: 1.6; }
     <!-- GENERATE TAB -->
     <div class="section" id="sec-generate">
       <h1 class="page-title">Generate comments</h1>
-      <p class="page-sub">Choose your options below, then generate. Each child gets nine comments — one per subject — written together so they don't repeat each other.</p>
+      <p class="page-sub">Choose your options below, then generate. Each child gets a General Comment plus one comment per subject, written together so they don't repeat each other.</p>
 
       <div id="gen-empty-msg" style="display:none">
         <div class="callout callout-info">
@@ -542,11 +542,11 @@ textarea { resize: vertical; line-height: 1.6; }
           </div>
           <div style="display:flex;gap:14px;align-items:flex-start">
             <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">3</div>
-            <div>Go to <strong>Generate</strong>, choose tone and length, and click "Generate all report cards." Each child gets nine comments: Language Arts, Math, Physical and Health Education, Applied Skills/Design/Technology, Science, Social Studies, Art, Career Education, and Goals.</div>
+            <div>Go to <strong>Generate</strong>, choose tone and length, and click "Generate all report cards." Each child gets a General Comment (from Strengths, Areas for growth, qualities and notes) plus a comment for each subject: Language Arts, Math, Physical and Health Education, Applied Skills/Design/Technology, Science, Social Studies, Art, Career Education, and Goals.</div>
           </div>
           <div style="display:flex;gap:14px;align-items:flex-start">
             <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">4</div>
-            <div>Use the <strong>Copy</strong> button beside each subject, <strong>Copy all nine</strong> per student, or <strong>Copy all</strong> to grab every comment at once. Paste directly into your report card system.</div>
+            <div>Use the <strong>Copy</strong> button beside each subject, <strong>Copy all</strong> per student, or <strong>Copy all</strong> to grab every comment at once. Paste directly into your report card system.</div>
           </div>
           <div style="display:flex;gap:14px;align-items:flex-start">
             <div style="min-width:28px;height:28px;background:var(--sage);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0">5</div>
@@ -559,8 +559,9 @@ textarea { resize: vertical; line-height: 1.6; }
         <div class="card-title">Tips for better comments</div>
         <ul style="font-size:14px;line-height:1.9;color:var(--ink-mid);padding-left:1.25rem">
           <li>The more specific your strengths and growth notes, the more tailored the comment.</li>
+          <li>Strengths, Areas for growth, personality qualities, accomplishments and additional notes go into the <strong>General Comment</strong> only — they no longer spill into every subject.</li>
           <li>A few words per subject is plenty — "reading at Level D, working on blends" anchors a whole Language Arts comment.</li>
-          <li>A subject left blank gets an honest, general comment (marked <em>general</em>) — the AI is told never to invent a project, reading level or outing it wasn't given.</li>
+          <li>A subject left blank gets a short, plain comment (marked <em>no note</em>) — the AI is told never to invent a project, reading level or outing it wasn't given.</li>
           <li>Goals is written as next steps for the term ahead, so fuller subject notes make for more concrete goals.</li>
           <li>Only first names are used. If two children share a first name, type "Emma T." as the first name.</li>
           <li>Select 2–4 personality qualities per student for the best balance.</li>
@@ -614,6 +615,9 @@ const SUBJECTS = [
     a: ['goals','goal','nextsteps'] }
 ];
 const KEYS = SUBJECTS.map(s => s.k);
+// What comes back: a General Comment (from the general boxes) followed by the nine subjects.
+const SECTIONS = [{ k: 'general', l: 'General Comment' }].concat(SUBJECTS);
+const OUT_KEYS = SECTIONS.map(s => s.k);
 
 function buildSubjectFields() {
   document.getElementById('subject-fields').innerHTML = SUBJECTS.map(s => `
@@ -823,9 +827,9 @@ async function generateAll() {
     return;
   }
 
-  const systemPrompt = `You are an experienced, thoughtful BC primary school teacher at Hans Helgeson Elementary School in Metchosin, British Columbia, writing the nine progress report sections for ONE child. You have a gift for noticing what makes each child genuinely unique and expressing it in writing that parents will treasure.
+  const systemPrompt = `You are an experienced, thoughtful BC primary school teacher at Hans Helgeson Elementary School in Metchosin, British Columbia, writing the progress report sections for ONE child. You have a gift for noticing what makes each child genuinely unique and expressing it in writing that parents will treasure.
 
-The nine sections, in order: ${SUBJECTS.map(s => s.l).join('; ')}.
+The ${SECTIONS.length} sections, in order: ${SECTIONS.map(s => s.l).join('; ')}.
 
 VOICE & TONE
 - Warm, professional, and sincere — the kind of writing a parent reads and thinks "she really knows my child"
@@ -833,25 +837,24 @@ VOICE & TONE
 - Avoid hollow praise words like "wonderful", "amazing", "fantastic", "superb" — show the quality through specific detail instead
 - Use only the child's first name, and sparingly: at most once per section, and never to open more than one section. Pronouns carry the rest.
 
-ACROSS THE NINE SECTIONS
+WHAT FEEDS EACH SECTION — THE HARD RULE
+- General Comment: the overall picture of the child. Built from the GENERAL NOTES (overall progress, strengths, areas for growth, personality and social qualities, personal accomplishments, additional notes). This is the ONLY section where the general notes appear.
+- Each subject section (Language Arts through Career Education): built ONLY from that subject's own note. Do not carry strengths, areas for growth, qualities, accomplishments or additional notes into subject sections — not even paraphrased.
+- A subject with NO note: one or two plain, general sentences about the child's learning in that subject, suited to the grade and term (for example, that the child is building skills or taking part in that area). Do NOT borrow from the general notes to fill it, and do NOT invent activities, projects, assessments, reading levels, incidents or events.
+- Goals: built from the Goals note, and may draw on the areas for growth and the subject notes. One or two concrete, encouraging next steps for the term ahead that the child and family can act on. Not a summary.
+- Class events and projects are shared by every child in the room: use them in at most two sections, only where they genuinely fit this child.
+
+ACROSS THE SECTIONS
 - No two sections open with the same word or sentence shape.
 - No observation, phrase or anecdote appears in more than one section.
-- Each section is clearly about its own subject — a comment that would fit under any heading has failed.
-
-GROUNDING — THE HARD RULE
-- Where a subject note is given, anchor that section in it and stay within what it says.
-- Where a subject has NO note, write briefly and generally from the child's overall profile, strengths and qualities. Do NOT invent activities, projects, assessments, reading levels, incidents or events.
-- Class events and projects are shared by every child in the room: draw on them in at most two sections, only where they genuinely fit this child.
+- Each subject section is clearly about its own subject — a comment that would fit under any heading has failed.
 
 BC PRIMARY CURRICULUM ALIGNMENT
 - Progress reports describe the learning journey — never use letter grades, percentages, or ranking language
 - Use BC curriculum language naturally: "developing", "demonstrating", "applying", "exploring", "building on"
 - Frame growth areas with a constructive, forward-looking lens — never deficit language
 
-THE GOALS SECTION
-- Not a summary. One or two concrete, encouraging next steps for the term ahead that the child and family can act on, growing naturally out of the other sections and the areas for growth.
-
-OUTPUT: Return ONLY a JSON object with exactly these nine keys: ${KEYS.join(', ')}. Each value is that section's comment as a plain string. No markdown, no code fences, no extra keys, no commentary.`;
+OUTPUT: Return ONLY a JSON object with exactly these ${OUT_KEYS.length} keys: ${OUT_KEYS.join(', ')}. Each value is that section's comment as a plain string. No markdown, no code fences, no extra keys, no commentary.`;
 
   for (let i = 0; i < students.length; i++) {
     const s = students[i];
@@ -866,22 +869,24 @@ OUTPUT: Return ONLY a JSON object with exactly these nine keys: ${KEYS.join(', '
     const classProjects = document.getElementById('class-projects').value.trim();
 
     const subjectNotes = SUBJECTS.map(sub =>
-      `- ${sub.l}: ${s.subjects[sub.k] || 'NO NOTE — keep general, invent nothing'}`).join('\n');
+      `- ${sub.l}: ${s.subjects[sub.k] || 'NO NOTE — keep it general, borrow nothing from the general notes, invent nothing'}`).join('\n');
 
-    const userPrompt = `Write the nine report card sections for ${s.fname}, a ${s.grade} student. Length: ${length} per section. Tone: ${tone}.
+    const userPrompt = `Write the report card sections for ${s.fname}, a ${s.grade} student. Length: ${length} per section. Tone: ${tone}.
 
-Student profile:
+Child:
 - First name: ${s.fname}
 - Pronouns: ${s.pronouns} (use ${pronounSubj}/${pronounObj}/${pronounPoss} throughout — never any other pronouns for this child)
-- Term: ${s.term}
+- ${s.grade}, ${s.term}
+
+GENERAL NOTES — for the General Comment only (areas for growth may also inform Goals):
 - Overall progress: ${s.progress}
 - Strengths: ${s.strengths || 'not specified'}
 - Areas for growth: ${s.growth || 'not specified'}
 - Personality & social qualities: ${s.qualities || 'not specified'}
 - Personal accomplishments this term: ${s.accomplishments || 'none noted'}
-- Additional context: ${s.notes || 'none'}
+- Additional notes: ${s.notes || 'none'}
 
-Teacher's notes per subject:
+SUBJECT NOTES — each feeds only its own section:
 ${subjectNotes}
 
 Class context (shared by all students — at most two sections, only where it fits):
@@ -935,14 +940,14 @@ ${teacher ? `\nEnd the Goals section with: — ${teacher}` : ''}`;
   }
 
   progFill.style.width = '100%';
-  status.textContent = `Done! ${students.length} student${students.length !== 1 ? 's' : ''} written — nine comments each.`;
+  status.textContent = `Done! ${students.length} student${students.length !== 1 ? 's' : ''} written — ten comments each.`;
   btn.disabled = false;
   btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:currentColor;fill:none"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg> Regenerate all';
   document.getElementById('copy-all-btn').style.display = 'inline-flex';
   renderRoster();
 }
 
-// Pulls the nine sections out of the model's reply, tolerating stray code fences
+// Pulls the sections out of the model's reply, tolerating stray code fences
 // or a sentence before/after the JSON.
 function parseSections(raw) {
   let txt = String(raw || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
@@ -951,7 +956,7 @@ function parseSections(raw) {
   let obj;
   try { obj = JSON.parse(txt.slice(a, b + 1)); } catch { return null; }
   const out = {}; let got = 0;
-  KEYS.forEach(k => { out[k] = String(obj[k] || '').trim(); if (out[k]) got++; });
+  OUT_KEYS.forEach(k => { out[k] = String(obj[k] || '').trim(); if (out[k]) got++; });
   return got ? out : null;
 }
 
@@ -967,14 +972,14 @@ function resultCardHTML(s, i) {
           <div class="result-name">${esc(s.fname)}</div>
           <div class="result-meta">${esc(s.grade)} · ${esc(s.term)} · ${esc(s.pronouns)}</div>
         </div>
-        <button class="btn btn-sm" onclick='copySingle(${id}, this)'>${COPY_ICON} Copy all nine</button>
+        <button class="btn btn-sm" onclick='copySingle(${id}, this)'>${COPY_ICON} Copy all</button>
       </div>
-      ${SUBJECTS.map(sub => {
-        const general = !s.subjects[sub.k];
+      ${SECTIONS.map(sub => {
+        const general = sub.k !== 'general' && !s.subjects[sub.k];
         return `<div class="sec-block">
           <div class="sec-head">
             <span class="sec-label">${esc(sub.l)}</span>
-            ${general ? '<span class="gen-tag" title="No note was entered for this subject, so the comment is kept general">general</span>' : ''}
+            ${general ? '<span class="gen-tag" title="No note was entered for this subject, so the comment is kept general">no note</span>' : ''}
             <button class="btn btn-sm" onclick='copySection(${id}, "${sub.k}", this)'>${COPY_ICON} Copy</button>
           </div>
           <div class="result-text${general ? ' general' : ''}">${esc(r[sub.k] || '—')}</div>
@@ -986,7 +991,7 @@ function resultCardHTML(s, i) {
 function studentText(s) {
   const r = genResults[s.id];
   if (!r) return null;
-  return `${s.fname} (${s.grade} · ${s.term})\n\n` + SUBJECTS.map(sub => `${sub.l}\n${r[sub.k] || '—'}`).join('\n\n');
+  return `${s.fname} (${s.grade} · ${s.term})\n\n` + SECTIONS.map(sub => `${sub.l}\n${r[sub.k] || '—'}`).join('\n\n');
 }
 
 function flashCopied(btn) {
