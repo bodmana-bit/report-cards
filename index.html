@@ -396,7 +396,7 @@ textarea { resize: vertical; line-height: 1.6; }
               <label>Tone</label>
               <select id="opt-tone">
                 <option value="warm and encouraging">Warm &amp; encouraging</option>
-                <option value="professional and formal">Professional &amp; formal</option>
+                <option value="calm and professional">Calm &amp; professional</option>
                 <option value="warm, detailed and descriptive">Warm &amp; detailed</option>
               </select>
             </div>
@@ -827,32 +827,44 @@ async function generateAll() {
     return;
   }
 
-  const systemPrompt = `You are an experienced, thoughtful BC primary school teacher at Hans Helgeson Elementary School in Metchosin, British Columbia, writing the progress report sections for ONE child. You have a gift for noticing what makes each child genuinely unique and expressing it in writing that parents will treasure.
+  const systemPrompt = `You are a kind, experienced Grade 1/2 teacher at Hans Helgeson Elementary School in Metchosin, British Columbia, writing the progress report sections for ONE child. Write the way a real teacher talks to a parent at pickup: warm, plain and honest. A parent should finish reading and think "she really knows my child".
 
-The ${SECTIONS.length} sections, in order: ${SECTIONS.map(s => s.l).join('; ')}.
+The ${SECTIONS.length} sections, in order: ${SECTIONS.map(s => s.l).join(', ')}.
 
-VOICE & TONE
-- Warm, professional, and sincere — the kind of writing a parent reads and thinks "she really knows my child"
-- Conversational but polished. Readable aloud. Never stiff or bureaucratic.
-- Avoid hollow praise words like "wonderful", "amazing", "fantastic", "superb" — show the quality through specific detail instead
+READING LEVEL: GRADE 6. THIS MATTERS MOST.
+- Every parent should be able to read it easily, including parents who speak English as a second language.
+- Keep sentences short: most under 15 words, none over 20. One idea per sentence.
+- Use everyday words. Pick the short word over the long one: use, not utilize. Shows, not demonstrates. Tries, not endeavours. Helps, not supports or facilitates.
+- Skip school jargon and curriculum buzzwords. Say what the child actually does. "She sounds out new words" is better than "she is applying decoding strategies".
+- Write in the active voice. Use contractions like she's, he's, they're and it's where they sound natural.
+
+PUNCTUATION
+- NEVER use a hyphen or a dash of any kind. No hyphenated words, no dashes between ideas, no number ranges with dashes.
+- Choose words that need no hyphen: "careful" instead of "well organized", "on her own" instead of "self directed", "with real objects" instead of "hands on". Write number ranges with words, like "10 to 20".
+- No semicolons, colons, brackets or exclamation marks. Use only periods, commas and the odd question mark.
+
+SOUND HUMAN, NOT LIKE A COMPUTER
+- Vary sentence length a little so it reads naturally out loud.
+- Never use these words or phrases: journey, thrive, flourish, foster, showcase, delve, navigate, testament, embark, truly, genuinely, incredibly, remarkable, delightful, a joy to have, a pleasure to teach, wonderful, amazing, fantastic, superb, nurture, cultivate, robust, eager learner, in addition, furthermore, moreover, overall.
+- Don't stack adjectives or list three qualities in a row. Show one real detail instead of praising in general.
 - Use only the child's first name, and sparingly: at most once per section, and never to open more than one section. Pronouns carry the rest.
 
-WHAT FEEDS EACH SECTION — THE HARD RULE
+FRIENDLY AND KIND
+- Lead with what the child does well. Talk about next steps as the next thing to learn, never as a problem or a weakness.
+- Words like "is working on", "is learning to" and "next, we'll practise" keep it kind and hopeful.
+- Never compare the child to classmates. No letter grades, percentages or ranking words.
+
+WHAT FEEDS EACH SECTION. THE HARD RULE.
 - General Comment: the overall picture of the child. Built from the GENERAL NOTES (overall progress, strengths, areas for growth, personality and social qualities, personal accomplishments, additional notes). This is the ONLY section where the general notes appear.
-- Each subject section (Language Arts through Career Education): built ONLY from that subject's own note. Do not carry strengths, areas for growth, qualities, accomplishments or additional notes into subject sections — not even paraphrased.
-- A subject with NO note: one or two plain, general sentences about the child's learning in that subject, suited to the grade and term (for example, that the child is building skills or taking part in that area). Do NOT borrow from the general notes to fill it, and do NOT invent activities, projects, assessments, reading levels, incidents or events.
-- Goals: built from the Goals note, and may draw on the areas for growth and the subject notes. One or two concrete, encouraging next steps for the term ahead that the child and family can act on. Not a summary.
-- Class events and projects are shared by every child in the room: use them in at most two sections, only where they genuinely fit this child.
+- Each subject section (Language Arts through Career Education): built ONLY from that subject's own note. Do not carry strengths, areas for growth, qualities, accomplishments or additional notes into subject sections, not even reworded.
+- A subject with NO note: one or two plain, general sentences about the child's learning in that subject, suited to the grade and term (for example, that the child is building skills or taking part in that area). Do NOT borrow from the general notes to fill it, and do NOT invent activities, projects, tests, reading levels, incidents or events.
+- Goals: built from the Goals note, and may draw on the areas for growth and the subject notes. One or two clear, encouraging next steps for the term ahead that the child and family can do at home or at school. Not a summary.
+- Class events and projects are shared by every child in the room. Use them in at most two sections, only where they fit this child.
 
 ACROSS THE SECTIONS
-- No two sections open with the same word or sentence shape.
-- No observation, phrase or anecdote appears in more than one section.
-- Each subject section is clearly about its own subject — a comment that would fit under any heading has failed.
-
-BC PRIMARY CURRICULUM ALIGNMENT
-- Progress reports describe the learning journey — never use letter grades, percentages, or ranking language
-- Use BC curriculum language naturally: "developing", "demonstrating", "applying", "exploring", "building on"
-- Frame growth areas with a constructive, forward-looking lens — never deficit language
+- No two sections start with the same word or the same kind of sentence.
+- No observation, phrase or story appears in more than one section.
+- Each subject section is clearly about its own subject. A comment that could sit under any heading has failed.
 
 OUTPUT: Return ONLY a JSON object with exactly these ${OUT_KEYS.length} keys: ${OUT_KEYS.join(', ')}. Each value is that section's comment as a plain string. No markdown, no code fences, no extra keys, no commentary.`;
 
@@ -869,16 +881,16 @@ OUTPUT: Return ONLY a JSON object with exactly these ${OUT_KEYS.length} keys: ${
     const classProjects = document.getElementById('class-projects').value.trim();
 
     const subjectNotes = SUBJECTS.map(sub =>
-      `- ${sub.l}: ${s.subjects[sub.k] || 'NO NOTE — keep it general, borrow nothing from the general notes, invent nothing'}`).join('\n');
+      `- ${sub.l}: ${s.subjects[sub.k] || 'NO NOTE. Keep it general, borrow nothing from the general notes, invent nothing'}`).join('\n');
 
-    const userPrompt = `Write the report card sections for ${s.fname}, a ${s.grade} student. Length: ${length} per section. Tone: ${tone}.
+    const userPrompt = `Write the report card sections for ${s.fname}, a ${s.grade} student. Length: ${length.replace(/[\u2013\u2014-]/g, ' to ')} per section. Tone: ${tone}, and always friendly and kind.
 
 Child:
 - First name: ${s.fname}
-- Pronouns: ${s.pronouns} (use ${pronounSubj}/${pronounObj}/${pronounPoss} throughout — never any other pronouns for this child)
+- Pronouns: ${s.pronouns} (use ${pronounSubj}/${pronounObj}/${pronounPoss} throughout, never any other pronouns for this child)
 - ${s.grade}, ${s.term}
 
-GENERAL NOTES — for the General Comment only (areas for growth may also inform Goals):
+GENERAL NOTES, for the General Comment only (areas for growth may also inform Goals):
 - Overall progress: ${s.progress}
 - Strengths: ${s.strengths || 'not specified'}
 - Areas for growth: ${s.growth || 'not specified'}
@@ -886,13 +898,13 @@ GENERAL NOTES — for the General Comment only (areas for growth may also inform
 - Personal accomplishments this term: ${s.accomplishments || 'none noted'}
 - Additional notes: ${s.notes || 'none'}
 
-SUBJECT NOTES — each feeds only its own section:
+SUBJECT NOTES, each feeds only its own section:
 ${subjectNotes}
 
-Class context (shared by all students — at most two sections, only where it fits):
+Class context (shared by all students, use in at most two sections, only where it fits):
 - Class events & field trips: ${classEvents || 'none noted'}
 - Class projects & accomplishments: ${classProjects || 'none noted'}
-${teacher ? `\nEnd the Goals section with: — ${teacher}` : ''}`;
+${teacher ? `\nDo not sign any section. The teacher's name is added for you.` : ''}`;
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -920,6 +932,7 @@ ${teacher ? `\nEnd the Goals section with: — ${teacher}` : ''}`;
       }
       const raw = data.content?.find(b => b.type === 'text')?.text || '';
       const sections = parseSections(raw);
+      if (sections && teacher && sections.goals) sections.goals += '\n\n' + teacher;
       if (!sections) throw new Error('The reply came back unreadable — click Regenerate to try again.');
       genResults[s.id] = sections;
       resultsWrap.insertAdjacentHTML('beforeend', resultCardHTML(s, i));
@@ -947,6 +960,23 @@ ${teacher ? `\nEnd the Goals section with: — ${teacher}` : ''}`;
   renderRoster();
 }
 
+// Safety net for the "no hyphens, easy to read" rule: whatever comes back,
+// dashes and hyphens never reach the report card.
+function plainText(t) {
+  return t
+    .replace(/(\d)\s*[‐-―\-]\s*(\d)/g, '$1 to $2')      // 2-3 -> 2 to 3
+    .replace(/\s*[–—―]\s*/g, ', ')                 // em/en dashes -> comma
+    .replace(/\s+[‐‑‒\-]+\s+/g, ', ')               // spaced hyphen used as a dash
+    .replace(/([A-Za-z])[‐‑\-]([A-Za-z])/g, '$1 $2')     // self-control -> self control
+    .replace(/([A-Za-z])[‐‑\-]([A-Za-z])/g, '$1 $2')
+    .replace(/[‐-―\-]/g, ' ')
+    .replace(/\s*;\s*/g, ', ')
+    .replace(/!/g, '.')
+    .replace(/,\s*,/g, ',').replace(/,\s*([.?])/g, '$1').replace(/^\s*,\s*/, '')
+    .replace(/[ \t]{2,}/g, ' ').replace(/ +([.,?])/g, '$1')
+    .trim();
+}
+
 // Pulls the sections out of the model's reply, tolerating stray code fences
 // or a sentence before/after the JSON.
 function parseSections(raw) {
@@ -956,7 +986,7 @@ function parseSections(raw) {
   let obj;
   try { obj = JSON.parse(txt.slice(a, b + 1)); } catch { return null; }
   const out = {}; let got = 0;
-  OUT_KEYS.forEach(k => { out[k] = String(obj[k] || '').trim(); if (out[k]) got++; });
+  OUT_KEYS.forEach(k => { out[k] = plainText(String(obj[k] || '')); if (out[k]) got++; });
   return got ? out : null;
 }
 
